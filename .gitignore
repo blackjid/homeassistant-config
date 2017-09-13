@@ -1,0 +1,7 @@
+*.log
+*.db
+.spotify-token-cache
+.uuid
+
+secrets.yaml
+emulated_hue_ids.json
