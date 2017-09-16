@@ -24,9 +24,12 @@ config:
 
 http:
   # Uncomment this to add a password (recommended!)
-  # api_password: PASSWORD
+  api_password: !secret http_password
   # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
   # base_url: example.duckdns.org:8123
+  trusted_networks:
+    - 127.0.0.1
+    - !secret http_trusted_network_range
 
 # Checks for available updates
 # Note: This component will send some information about your system to
