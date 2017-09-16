@@ -1,0 +1,88 @@
+# VIEWS
+default_view:
+  view: yes
+  name: Home
+  icon: mdi:home
+  entities:
+    - group.lights
+    - group.crypto
+    - device_tracker.mpgomeze_iphone
+    - device_tracker.jidonoso_oneplus3
+
+media_view:
+  view: yes
+  name: Media
+  entities:
+    - media_player.spotify
+    - media_player.roku
+
+rooms_view:
+  view: yes
+  name: Rooms
+  entities:
+    - group.living_lights
+    - group.bedroom_lights
+    - group.kids_bedroom_lights
+
+system_view:
+  view: yes
+  name: System
+  icon: mdi:settings
+  entities:
+    - group.system
+    - group.google_wifi
+
+# GROUPS
+living_lights:
+  name: Living Lights
+  icon: mdi:home
+  entities:
+    - light.living
+    - switch.living_stand
+    - switch.dining_room
+
+kids_bedroom_lights:
+   name: Kid's Bedroom Lights
+   icon: mdi:odnoklassniki
+   entities:
+     - light.kids_bedroom
+
+bedroom_lights:
+  name: Bedroom Lights
+  icon: mdi:hotel
+  entities:
+    - light.bedroom
+
+lights:
+  name: Lights
+  entities:
+    - group.living_lights
+    - group.bedroom_lights
+    - group.kids_bedroom_lights
+
+crypto:
+  name: Crypto Market
+  icon: mdi:coins
+  entities:
+    - sensor.bitcoin
+    - sensor.ethereum
+
+system:
+  name: System
+  entities:
+  - sensor.cpu_use
+  - sensor.disk_use_
+  - sensor.ram_free
+  - sensor.received_eth0
+  - sensor.sent_eth0
+  - sensor.last_boot
+
+google_wifi:
+  name: Router
+  entities:
+    - sensor.google_wifi_current_version
+    - sensor.google_wifi_new_version
+    - sensor.google_wifi_uptime
+    - sensor.google_wifi_last_restart
+    - sensor.google_wifi_local_ip
+    - sensor.google_wifi_status
