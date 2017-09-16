@@ -3,5 +3,8 @@
 .spotify-token-cache
 .uuid
 
-secrets.yaml
+/www/ignored/*
+
+known_devices.yaml
 emulated_hue_ids.json
+secrets.yaml
