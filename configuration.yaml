@@ -29,7 +29,7 @@ http:
   base_url: !secret http_base_url
   trusted_networks:
     - 127.0.0.1
-    - !secret http_trusted_network_range
+    - !secret http_network_subnet_mask
 
 mqtt:
   broker: 172.17.0.1
@@ -66,6 +66,7 @@ tts:
 
 group: !include groups.yaml
 automation: !include automations.yaml
+device_tracker: !include device_trackers.yaml
 light: !include lights.yaml
 media_player: !include media_players.yaml
 script: !include scripts.yaml

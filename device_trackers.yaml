@@ -1,0 +1,6 @@
+device_tracker:
+  - platform: owntracks
+  - platform: nmap_tracker
+    track_new_devices: false
+    hosts:
+      - !secret http_network_subnet_mask
