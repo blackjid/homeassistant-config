@@ -31,6 +31,11 @@ http:
     - 127.0.0.1
     - !secret http_trusted_network_range
 
+mqtt:
+  broker: 172.17.0.1
+  username: homeassistant
+  password: !secret mqtt_password
+
 # Checks for available updates
 # Note: This component will send some information about your system to
 # the developers to assist with development of Home Assistant.
