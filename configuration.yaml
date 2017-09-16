@@ -67,6 +67,7 @@ tts:
 group: !include groups.yaml
 automation: !include automations.yaml
 light: !include lights.yaml
+media_player: !include media_players.yaml
 script: !include scripts.yaml
 sensor: !include sensors.yaml
 zone: !include_dir_list zones

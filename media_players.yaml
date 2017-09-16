@@ -1,0 +1,2 @@
+- platform: roku
+  host: !secret roku_ip_address
