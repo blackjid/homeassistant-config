@@ -1,2 +1,8 @@
 # Weather prediction
 - platform: yr
+
+# Crypto
+- platform: coinmarketcap
+
+- platform: coinmarketcap
+  currency: ethereum
