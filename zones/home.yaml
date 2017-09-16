@@ -1,0 +1,5 @@
+name: !secret zone_home_name
+latitude: !secret zone_home_latitude
+longitude: !secret zone_home_longitude
+radius: 100
+icon: mdi:home
