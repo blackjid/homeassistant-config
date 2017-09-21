@@ -67,7 +67,7 @@ tts:
   - platform: google
 
 group: !include groups.yaml
-automation: !include automations.yaml
+automation: !include_dir_merge_list automation
 device_tracker: !include device_trackers.yaml
 light: !include lights.yaml
 media_player: !include media_players.yaml
