@@ -4,9 +4,6 @@
       at: '06:40:00'
 
   condition:
-    - condition: state
-      entity_id: group.family
-      state: home
     - condition: time
       weekday:
         - mon
