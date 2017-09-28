@@ -31,6 +31,7 @@ system_view:
   entities:
     - group.system
     - group.google_wifi
+    - group.automations
 
 # GROUPS
 living_lights:
@@ -86,3 +87,8 @@ google_wifi:
     - sensor.google_wifi_last_restart
     - sensor.google_wifi_local_ip
     - sensor.google_wifi_status
+
+automations:
+  name: Automations
+  entities:
+    - automation.good_morning_routine
