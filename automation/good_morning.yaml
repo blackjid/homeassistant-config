@@ -40,7 +40,7 @@
     - service: switch.turn_on
       data:
         entity_id: switch.dining_room
-    - service: switch.turn_on
+    - service: light.turn_on
       data:
         entity_id: light.kids_bedroom
         transition: 30
