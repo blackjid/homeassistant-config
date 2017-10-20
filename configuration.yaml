@@ -68,6 +68,7 @@ tts:
 
 group: !include groups.yaml
 automation: !include_dir_merge_list automation
+binary_sensor: !include binary_sensors.yaml
 device_tracker: !include device_trackers.yaml
 light: !include lights.yaml
 media_player: !include media_players.yaml

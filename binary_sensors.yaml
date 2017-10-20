@@ -1,0 +1,6 @@
+- platform: mqtt
+  state_topic: "wallpanel/mainpanel/sensor/motion"
+  name: "Living Motion"
+  payload_on: '{"value":true}'
+  payload_off: '{"value":false}'
+  device_class: motion
