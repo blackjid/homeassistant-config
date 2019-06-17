@@ -1,0 +1,11 @@
+- alias: Homeassistant | Ready
+  trigger:
+    platform: homeassistant
+    event: start
+  action:
+  - service: notify.web
+    data_template:
+      message: "Homeassistant is ready..."
+      target: negros_phone
+      data:
+        tag: homeassistant_ready"

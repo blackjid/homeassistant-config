@@ -1,0 +1,40 @@
+rest_command:
+  platanus_api:
+    url: !secret platanus_hass_api_url
+    method: POST
+    headers:
+      x-ha-access: !secret platanus_hass_token
+      content_type: 'application/json; charset=utf-8'
+      payload: '{"entity_id":"{{ entity_id }}"}'
+
+automation:
+  - alias: Notification to open the door at Platanus
+    trigger:
+      platform: zone
+      entity_id: device_tracker.negros_phone_mqtt
+      zone: zone.platanus
+      event: enter
+    action:
+      - service: notify.web
+        data_template:
+          message: "Welcome to L Conquistador."
+          target: negros_phone
+          data:
+            tag: platanus_doors_notification
+            actions:
+              - action: open_platanus_door
+                title: "Open doors"
+            
+  - alias: Notification action click to open de door
+    trigger:
+      platform: event
+      event_type: html5_notification.clicked
+      event_data:
+        action: open_platanus_door
+    action:
+      - service: rest_command.platanus_api
+        data:
+          entity_id: switch.outside_door
+      - service: rest_command.platanus_api
+        data:
+          entity_id: switch.main_door

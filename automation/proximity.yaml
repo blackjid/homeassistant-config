@@ -1,0 +1,20 @@
+- alias: Presence | Notification heater away mode off when coming home
+  trigger:
+  - platform: numeric_state
+    entity_id: proximity.home
+    below: 200 
+    above: 5
+
+  condition:
+  - condition: template
+    value_template: '{{ states.proximity.home.attributes.dir_of_travel == "towards" }}'
+  - condition: template
+    value_template: "{{ is_state_attr('climate.house_heating', 'away_mode', 'on') }}"
+    
+  action:
+  - service: script.thermostat_ask_to_set_away_mode_off
+    data:
+      target: negro
+  - service: script.thermostat_ask_to_set_away_mode_off
+    data:
+      target: maria

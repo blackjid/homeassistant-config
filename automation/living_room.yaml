@@ -1,0 +1,75 @@
+- alias: 'Living Camera | Motion detected'
+  trigger:
+    payload: 'ON'
+    platform: mqtt
+    topic: home/living_camera/motion
+  action:
+    service: notify.web
+    data:
+      title: "Motion"
+      target: negros_phone
+      message: "detected."
+
+- alias: 'Living Camera | Start motion detection when not at home'
+  trigger:
+    platform: zone
+    event: leave
+    zone: zone.home
+    entity_id: group.main_devices
+  action:
+    service: switch.turn_on
+    data:
+      entity_id: switch.living_camera_motion_detection
+
+- alias: 'Living Camera | Stop motion detection when at home'
+  trigger:
+    platform: zone
+    event: enter
+    zone: zone.home
+    entity_id: group.main_devices
+  action:
+    service: switch.turn_off
+    data:
+      entity_id: switch.living_camera_motion_detection
+      
+- alias: 'Living Camera | Notify motion detection in living room'
+  trigger:
+    platform: state
+    entity_id: binary_sensor.living_camera_motion_sensor
+    to: 'on'
+  action:
+  - service: automation.turn_off
+    entity_id: automation.living_camera_notify_motion_detection_in_living_room
+  - service: notify.web
+    data_template:
+      message: "Someone in the living room"
+      target: negros_phone
+      data:
+        tag: living_motion
+        image: "{{ state_attr('camera.living_camera_motion_snapshot', 'entity_picture') }}"
+  - delay:
+      minutes: 1
+  - service: automation.turn_on
+    entity_id: automation.living_camera_notify_motion_detection_in_living_room
+  
+        
+- alias: 'Living Camera | Turn on night mode when dark'
+  trigger:
+    platform: numeric_state
+    entity_id: sensor.living_luminance
+    below: 5
+  action:
+  - service: switch.turn_on
+    data:
+      entity_id: switch.living_camera_night_mode
+
+- alias: 'Living Camera | Turn off night mode on light'
+  trigger:
+    platform: numeric_state
+    entity_id: sensor.living_luminance
+    above: 5
+  action:
+  - service: switch.turn_off
+    data:
+      entity_id: switch.living_camera_night_mode
+      

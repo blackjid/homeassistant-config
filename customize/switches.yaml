@@ -1,4 +1,6 @@
-switch.dining_room:
-  icon: mdi:lightbulb
-switch.living_stand:
-  icon: mdi:lightbulb
+switch.aeotec_zw140_dual_nano_switch_switch_14:
+  device_class: light
+switch.aeotec_zw140_dual_nano_switch_switch_13:
+  device_class: light
+switch.aeotec_zw140_dual_nano_switch_switch_15:
+  hidden: true

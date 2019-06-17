@@ -1,8 +1,9 @@
-# Tplink
-- platform: tplink
-  name: !secret switch_tplink_1_name
-  host: !secret switch_tplink_1_host
+- platform: flux
+  lights:
+    - light.entrance
+    - light.terrace_1
+    - light.terrace_2
+    - light.master_room_side_mom
+    - light.master_room_side_dad
+  name: Fluxer
 
-- platform: tplink
-  name: !secret switch_tplink_2_name
-  host: !secret switch_tplink_2_host

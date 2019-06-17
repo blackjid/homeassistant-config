@@ -3,9 +3,10 @@
 
 # Crypto
 - platform: coinmarketcap
+  currency_id: 1
 
 - platform: coinmarketcap
-  currency: ethereum
+  currency_id: 1027
 
 # Raspberry Pi System Information
 - platform: systemmonitor
@@ -22,3 +23,24 @@
 
 # Google Wifi router
 - platform: google_wifi
+
+- platform: min_max
+  name: House Mean Temperature
+  type: mean
+  entity_ids:
+    - sensor.living_room_temperature
+    - sensor.master_bedroom_temperature
+    - sensor.family_room_temperature
+
+- platform: filter
+  name: "filtered bedroom temperature"
+  entity_id: sensor.master_bedroom_temperature
+  filters:
+    - filter: outlier
+      window_size: 4
+      radius: 2.0
+    - filter: lowpass
+      time_constant: 10
+    - filter: time_simple_moving_average
+      window_size: 00:05
+      precision: 2

@@ -1,0 +1,35 @@
+home: 
+  devices:
+    - device_tracker.marias_phone_mqtt
+    - device_tracker.negros_phone_mqtt
+  tolerance: 50
+  unit_of_measurement: km
+  
+platanus: 
+  zone: !secret zone_work_name
+  devices:
+    - device_tracker.marias_phone_mqtt
+    - device_tracker.negros_phone_mqtt
+  tolerance: 50
+  unit_of_measurement: km
+
+negro_work:
+  zone: !secret zone_work_name
+  devices:
+    - device_tracker.negros_phone_mqtt
+  tolerance: 50
+  unit_of_measurement: km
+  
+maria_work:
+  zone: !secret zone_daycare_id
+  devices:
+    - device_tracker.marias_phone_mqtt
+  tolerance: 50
+  unit_of_measurement: km
+
+lin_home: 
+  devices:
+    - device_tracker.lins_phone_bt
+  tolerance: 50
+  unit_of_measurement: km
+  

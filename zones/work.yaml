@@ -1,0 +1,5 @@
+name: !secret zone_work_name
+latitude: !secret zone_work_latitude
+longitude: !secret zone_work_longitude
+radius: 100
+icon: mdi:briefcase

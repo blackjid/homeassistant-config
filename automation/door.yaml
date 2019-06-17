@@ -1,0 +1,37 @@
+- alias: "Front Door | Notification action click open door"
+  trigger:
+    platform: event
+    event_type: html5_notification.clicked
+    event_data:
+      action: open_home_front_door
+  action:
+    - service: lock.unlock
+      data: 
+        entity_id: lock.front_door
+
+- alias: "Front Door | Notification to open the door at home"
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.negros_phone_mqtt, device_tracker.marias_phone_mqtt
+    zone: zone.home
+    event: enter
+  action:
+  - service_template: "notify.home_{{trigger.entity_id | replace('device_tracker.', '') | replace('_mqtt','')}}"
+    data_template:
+      message: "Welcome {{ state_attr('zone.home', 'friendly_name') | lower }} !!"
+      data:
+        tag: home_front_door_notification
+        actions:
+          - action: open_home_front_door
+            title: "Open the door"
+            
+- alias: "Front Door | Open the door on bluetooth presence"
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.negros_phone_bt, device_tracker.marias_phone_bt
+    zone: zone.home
+    event: enter
+  action:
+  - service_template: "notify.home_{{trigger.entity_id | replace('device_tracker.', '') | replace('_bt','')}}"
+    data_template:
+      message: "This would've open the door now"

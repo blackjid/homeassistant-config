@@ -1,0 +1,13 @@
+'1527385417995':
+  alias: Test TTS
+  sequence:
+  - data:
+      entity_id: media_player.living_room_google_home
+      message: Hi Pili!, It's really you?
+    service: tts.google_say
+'1539620735194':
+  alias: test
+  sequence:
+  - condition: state
+    entity_id: automation.homeassistant_ready
+    state: ready

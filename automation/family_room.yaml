@@ -1,0 +1,16 @@
+- alias: Night Light
+  trigger:
+  - platform: state
+    entity_id: sensor.zooz_family_room_alarm_level
+    to: '255'
+  condition:
+    - condition: state
+      entity_id: sun.sun
+      state: 'below_horizon'
+  action:
+  - service: light.lifx_set_state
+    data:
+      entity_id: light.desk
+      power: true
+      brightness_pct: 11
+      color_temp: 417

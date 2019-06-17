@@ -1,0 +1,129 @@
+media_player:
+  - platform: vizio
+    host: !secret vizio_host
+    access_token: !secret vizio_access_token
+
+sensor:
+  - platform: template
+    sensors:
+      marantz_source:
+        friendly_name: Marantz Receiver Source
+        value_template: "{{ state_attr('media_player.marantz', 'source') }}"
+      vizio_smartcast_source:
+        friendly_name: Vizio TV Source
+        value_template: "{{ state_attr('media_player.vizio_smartcast', 'source') }}"
+
+automation:
+  - alias: Living TV | Toggle TV Bias Lights when dark
+    trigger:
+      - platform: state
+        entity_id: media_player.vizio_smartcast
+    condition: # 'when dark' condition: either after sunset or before sunrise
+      - condition: state
+        entity_id: sun.sun
+        state: 'below_horizon'
+    action:
+      - service: light.lifx_set_state
+        data_template:
+          entity_id: light.tv_bias
+          power: '{{ states("media_player.vizio_smartcast") }}'
+          brightness: 63
+          color_temp: 307
+
+  - alias: Living TV | Switch TV to HDMI input when Marantz on Xbox Input
+    trigger:
+      - platform: template
+        value_template: "{{ states('sensor.marantz_source') | regex_match('TV Audio|Media Player') }}"
+    condition:
+      - condition: template
+        value_template: "{{ not is_state('sensor.vizio_smartcast_source', 'HDMI-1') }}"
+    action:
+      - service: media_player.select_source
+        data:
+          entity_id: media_player.vizio_smartcast
+          source: HDMI-1
+
+  - alias: Living TV | Switch Marantz to Xbox Input when TV on HDMI
+    trigger:
+      - platform: state
+        entity_id: sensor.vizio_smartcast_source
+        to: 'HDMI-1'
+    condition:
+      - condition: template
+        value_template: '{{ not is_state("media_player.xbox", "Off") }}'
+    action:
+      - service: media_player.select_source
+        data:
+          entity_id: media_player.marantz
+          source: 'Xbox One S'
+ 
+  - alias: Living TV | Switch Marantz to Media Player Input when TV on HDMI
+    trigger:
+      - platform: state
+        entity_id: sensor.vizio_smartcast_source
+        to: 'HDMI-1'
+    condition:
+      - condition: template
+        value_template: '{{ not is_state("media_player.mi_box_s", "Off") }}'
+    action:
+      - service: media_player.select_source
+        data:
+         entity_id: media_player.marantz
+         source: 'Media Player'
+
+
+
+         
+  # This is handled by TV CEC support
+  #- alias: Switch Marantz to TV Audio Input when TV on CAST
+
+
+
+
+
+
+  # - platform: universal
+  #   name: Livingroom TV
+  #   children:
+  #     - media_player.vizio_smartcast
+  #     - media_player.living_tv_cast
+  #     - media_player.marantz
+  #   state_template: {{ state('media_player.vizio_smartcast') }}
+  #   commands:
+  #     turn_on:
+  #       service: script.turn_on
+  #       data:
+  #         entity_id: script.turn_on_livingroom_mediacenter
+  #     turn_off:
+  #       service: script.turn_on
+  #       data:
+  #         entity_id: script.turn_off_livingroom_mediacenter
+  #     volume_up:
+  #       service: media_player.volume_set
+  #       data_template:
+  #         entity_id: media_player.livingroom_receiver
+  #         volume_level: '{{ states.media_player.livingroom_receiver.attributes.volume_level + 0.02 }}'
+  #     volume_down:
+  #       service: media_player.volume_set
+  #       data_template:
+  #         entity_id: media_player.livingroom_receiver
+  #         volume_level: '{{ states.media_player.livingroom_receiver.attributes.volume_level - 0.02 }}'
+  #     volume_mute:
+  #       service: media_player.volume_mute
+  #       data:
+  #         entity_id: media_player.livingroom_receiver
+  #     select_source:
+  #       service: media_player.select_source
+  #       data_template:
+  #         entity_id: media_player.receiver
+  #         source: '{{ source }}'
+  #     volume_set:
+  #       service: media_player.volume_set
+  #       data_template:
+  #         entity_id: media_player.livingroom_receiver
+  #         volume_level: '{{ volume_level }}'
+  #   attributes:
+  #     volume_level: media_player.livingroom_receiver|volume_level
+  #     source: media_player.livingroom_receiver|source
+  #     source_list: media_player.livingroom_receiver|source_list
+  #     is_volume_muted: media_player.livingroom_receiver|is_volume_muted

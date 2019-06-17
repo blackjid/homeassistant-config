@@ -1,0 +1,98 @@
+media_player:
+  - platform: denonavr
+    host: !secret marantz_host
+    name: marantz
+    scan_interval: 2
+
+  - platform: universal
+    name: Living Music
+    children:
+      - media_player.living_room_audio
+      - media_player.marantz
+    state_template: >
+      {% if is_state('media_player.marantz', 'on') %}
+        {{ states('media_player.living_room_audio') }}
+      {% else %}
+        off
+      {% endif %}
+    commands:
+      turn_on:
+        service: media_player.turn_on
+        data:
+          entity_id: media_player.marantz
+      turn_off:
+        service: media_player.turn_off
+        data:
+          entity_id: media_player.marantz
+      volume_up:
+        service: media_player.volume_up
+        data_template:
+          entity_id: media_player.marantz
+      volume_down:
+        service: media_player.volume_down
+        data_template:
+          entity_id: media_player.marantz
+      volume_mute:
+        service: media_player.volume_mute
+        data:
+          entity_id: media_player.marantz
+      select_source:
+        service: media_player.select_source
+        data_template:
+          entity_id: media_player.marantz
+          source: '{{ source }}'
+      volume_set:
+        service: media_player.volume_set
+        data_template:
+          entity_id: media_player.marantz
+          volume_level: '{{ volume_level }}'
+    attributes:
+      volume_level: media_player.marantz|volume_level
+      source: media_player.marantz|source
+      source_list: media_player.marantz|source_list
+      is_volume_muted: media_player.marantz|is_volume_muted
+
+automation:
+  - alias: Turn on receiver from Chromecast
+    trigger:
+      platform: state
+      entity_id: media_player.living_room_audio
+      to: 'playing'
+    action:
+      - service: media_player.turn_on
+        data:
+          entity_id: media_player.marantz
+      - service: media_player.select_source
+        data:
+          entity_id: media_player.marantz
+          source: Chromecast
+
+  - alias: Pause Chromecast on Marantz input change or off
+    trigger:
+      - platform: state
+        entity_id: media_player.marantz
+        to: 'off'
+      - platform: state
+        entity_id: sensor.marantz_source
+        from: Chromecast
+    action:
+      - service: media_player.media_pause
+        data:
+          entity_id: media_player.living_room_audio
+
+  - alias: Play Chromecast on input back or on
+    trigger:
+      - platform: state
+        entity_id: media_player.marantz
+        to: 'on'
+      - platform: state
+        entity_id: sensor.marantz_source
+        to: Chromecast
+    condition:
+      - condition: state
+        entity_id: media_player.living_room_audio
+        state: 'paused'
+    action:
+      - service: media_player.media_play
+        data:
+          entity_id: media_player.living_room_audio

@@ -2,4 +2,4 @@ name: !secret zone_daycare_name
 latitude: !secret zone_daycare_latitude
 longitude: !secret zone_daycare_longitude
 radius: 100
-icon: mdi:school
+icon: mdi:human-male-boy

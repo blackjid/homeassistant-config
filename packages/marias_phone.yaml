@@ -1,0 +1,44 @@
+device_tracker:
+  - platform: mqtt_json
+    devices:
+      marias_phone_mqtt: "zanzito/marias_phone/location"
+
+group:
+  marias_tracker:
+    name: Maria's Tracker
+    entities:
+      - device_tracker.marias_phone_mqtt
+      - device_tracker.marias_phone_bt
+
+sensor:
+  - platform: mqtt
+    name: Maria's Phone
+    state_topic: "zanzito/marias_phone/device_info"
+    availability_topic: "zanzito/marias_phone/status"
+    payload_available: "1"
+    payload_not_available: "0"
+    value_template: "{{ states('binary_sensor.marias_phone_status') }}"
+    json_attributes_topic: "zanzito/marias_phone/device_info"
+
+binary_sensor:
+  - platform: mqtt
+    name: Maria's Phone Status
+    state_topic: "zanzito/marias_phone/status"
+    payload_on: "1"
+    payload_off: "0"
+
+  - platform: bayesian
+    prior: 0.9
+    name: 'Maria @ Home'
+    probability_threshold: 0.9
+    observations:
+      - entity_id: 'device_tracker.marias_phone_bt'
+        prob_given_true: 0.9
+        prob_given_false: 0.1
+        platform: 'state'
+        to_state: 'home'
+      - entity_id: 'device_tracker.marias_phone_mqtt'
+        prob_given_true: 0.9
+        prob_given_false: 0.2
+        platform: 'state'
+        to_state: 'home'

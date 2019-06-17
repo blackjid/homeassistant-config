@@ -1,6 +1,13 @@
-- platform: roku
-  host: !secret roku_ip_address
-
 - platform: spotify
   client_id: !secret spotify_client_id
   client_secret: !secret spotify_client_secret
+
+- platform: androidtv
+  host: 192.168.86.24
+  name: Xiaomi Mi Box S
+  adb_server_ip: 172.30.32.1
+  adb_server_port: 5037
+
+- platform: xboxone
+  device: FD009374623167E
+  name: Xbox One S

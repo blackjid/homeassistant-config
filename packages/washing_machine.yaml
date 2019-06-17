@@ -1,0 +1,118 @@
+homeassistant:
+
+  customize:
+    switch.washing_machine:      
+      icon: mdi:washing-machine
+    input_select.washing_machine_status:
+      hidden: true
+
+input_select:
+  washing_machine_status:
+    name: Washing Machine Status
+    options:
+      - 'Off'
+      - Idle
+      - Running
+      - Finishing
+
+sensor:
+  - platform: template
+    sensors:
+      washing_machine_status:
+        friendly_name: Washing Machine Status
+        value_template: "{{ states('input_select.washing_machine_status') }}"
+      washing_machine_current:
+        friendly_name: Washing Machine Amps
+        value_template: "{{ state_attr('switch.washing_machine', 'current_a') | float }}"
+        unit_of_measurement: 'amp'
+
+tplink:
+  discovery: true
+
+history_graph:
+  washing_machine_graph:
+    name: Washing Machine
+    entities:
+      - sensor.washing_machine_status
+      - sensor.washing_machine_current
+      
+automation:
+  - id: washing_machine_idle
+    alias: 'Washer | Switch state to Idle'
+    trigger:
+      - entity_id: sensor.washing_machine_current
+        platform: numeric_state
+        above: 0.05
+    condition:
+      condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.washing_machine_status
+          state: 'Off'
+        - condition: state
+          entity_id: input_select.washing_machine_status
+          state: 'Finishing'
+    action:
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.washing_machine_status
+          option: 'Idle'
+  - id: washing_machine_running
+    alias: 'Washer | Switch state to Running'
+    trigger:
+      - entity_id: sensor.washing_machine_current
+        platform: numeric_state
+        above: 3
+    condition:
+      - condition: state
+        entity_id: input_select.washing_machine_status
+        state: 'Idle'
+    action:
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.washing_machine_status
+          option: 'Running'
+  - id: washing_machine_finishing
+    alias: 'Washer | Switch state to Finishing'
+    trigger:
+      - entity_id: sensor.washing_machine_current
+        platform: numeric_state
+        below: 2.5
+        above: 1
+        for:
+          seconds: 30
+    condition:
+      - condition: state
+        entity_id: input_select.washing_machine_status
+        state: 'Running'
+    action:
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.washing_machine_status
+          option: 'Finishing'
+  - id: washing_machine_off
+    alias: 'Washer | Switch state to Off'
+    trigger:
+      - entity_id: sensor.washing_machine_current
+        platform: numeric_state
+        below: 0.05
+        for:
+          minutes: 1
+    condition:
+      condition: or
+      conditions:
+        - condition: state
+          entity_id: input_select.washing_machine_status
+          state: 'Idle'
+        - condition: state
+          entity_id: input_select.washing_machine_status
+          state: 'Finishing'
+    action:
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.washing_machine_status
+          option: 'Off'
+      - service: tts.google_say
+        entity_id: media_player.first_floor
+        data:
+          message: "The laundry is ready"

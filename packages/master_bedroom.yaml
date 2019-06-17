@@ -1,0 +1,27 @@
+group:
+  master_bedroom_lights:
+    name: Master Bedroom Lights
+    entities:
+    - light.master_bedroom_side_dad
+    - light.master_bedroom_side_mom
+
+automation:
+- alias: Master Bedroom | Turn on lights on movement
+  trigger:
+    - platform: state
+      entity_id: sensor.master_bedroom_burglar
+      to: "8"
+  condition:
+    - condition: state
+      entity_id: sun.sun
+      state: 'below_horizon'
+    - condition: state
+      entity_id: input_boolean.home_sleep_mode
+      state: 'off'
+  action:
+    - service: light.lifx_set_state
+      data:
+        entity_id: group.master_bedroom_lights
+        power: on
+        brightness_pct: 40
+        transition: 5

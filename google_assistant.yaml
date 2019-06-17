@@ -1,0 +1,46 @@
+project_id: !secret google_assistant_project_id
+api_key: !secret google_assistant_api_key
+expose_by_default: false
+entity_config:
+  light.master_bedroom_side_dad:
+    room: Master Bedroom
+    expose: true
+  light.master_bedroom_side_mom:
+    room: Master Bedroom
+    expose: true
+  light.front_door:
+    room: Entryway
+    expose: true
+  light.ines_bedroom:
+    room: Ines's Bedroom
+    expose: true
+  light.tv_bias:
+    room: Living Room
+    expose: true
+  light.terrace_1:
+    room: Terrace
+    expose: true
+  light.terrace_2:
+    room: Terrace
+    expose: true
+  light.terrace_3:
+    room: Terrace
+    expose: true
+  light.family_room_desk:
+    room: Family Room
+    expose: true
+  switch.living_main_light:
+    room: Living Room
+    expose: true
+  switch.living_tv_light:
+    room: Living Room
+    expose: true
+  switch.hall_light:
+    room: Entryway
+    expose: true
+  climate.house_heating:
+    expose: true
+  lock.front_door:
+    expose: true
+  camera.living_room:
+    expose: true

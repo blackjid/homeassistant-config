@@ -1,0 +1,3 @@
+home_sleep_mode:
+  name: Whether the home is in sleep mode
+  icon: mdi:sleep

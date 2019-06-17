@@ -12,29 +12,42 @@ homeassistant:
   time_zone: America/New_York
   # Customization file
   customize: !include_dir_merge_named customize
-
+  # Packages:
+  packages: !include_dir_named packages
+  auth_providers:
+    - type: homeassistant
+    - type: legacy_api_password
+      api_password: !secret http_password
+    - type: trusted_networks
+      trusted_networks:
+        - 127.0.0.1
+        - !secret http_network_subnet_mask
+      
 # Show links to resources in log and frontend
 # introduction:
 
 # Enables the frontend
 frontend:
 
+lovelace:
+  mode: yaml
+
 # Enables configuration UI
 config:
 
+# Enables Hassio UI
+hassio:
+
+# Enables Map panel
+map:
+
+system_health:
+
 http:
-  # Uncomment this to add a password (recommended!)
-  api_password: !secret http_password
   # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
   base_url: !secret http_base_url
-  trusted_networks:
-    - 127.0.0.1
-    - !secret http_network_subnet_mask
-
-mqtt:
-  broker: 172.17.0.1
-  username: homeassistant
-  password: !secret mqtt_password
+  cors_allowed_origins:
+    - http://hassio.local:7080
 
 # Checks for available updates
 # Note: This component will send some information about your system to
@@ -48,30 +61,122 @@ updater:
 # Discover some devices automatically
 discovery:
 
-emulated_hue:
-
-# Allows you to issue voice commands from the frontend in enabled browsers
-conversation:
-
 # Enables support for tracking state changes over time
 history:
+
+recorder:
+#   db_url: mysql://hass:bsgj6QWXGkQ8p7Mc@black-station:3307/homeassistant?charset=utf8
+
+# influxdb:
+#   username: homeassistant
+#   password: !secret influxdb_password
+#   max_retries: 3
+#   tags:
+#     source: hass
 
 # View all events in a logbook
 logbook:
 
+notify:
+  - name: web
+    platform: html5
+    vapid_pub_key: !secret vapid_pub_key
+    vapid_prv_key: !secret vapid_prv_key
+    vapid_email: !secret vapid_email
+
 # Track the sun
 sun:
 
+device_tracker:
+  - platform: bluetooth_tracker
+  # - platform: googlehome
+  #   host: 192.168.86.36
+  # - platform: googlehome
+  #   host: 192.168.86.36
+  # - platform: googlehome
+  #   host: 192.168.86.26
+
+person:
+  - name: Negro
+    id: blackjid
+    user_id: c2a82681b8764b7b9676e917a9daaf6b
+    device_trackers:
+    - device_tracker.negros_phone_mqtt
+    - device_tracker.negros_phone_bt
+  - name: Maria Paz
+    id: mariapaz
+    user_id: 67b2ff7cd7824bf18490443d529a0e06
+    device_trackers:
+    - device_tracker.marias_phone_mqtt
+    - device_tracker.marias_phone_bt
+
+zwave:
+  usb_path: /dev/ttyACM0
+  network_key: !secret zwave_network_key
+  device_config_glob:
+    "sensor.*_sourcenodeid*":
+      ignored: true
+
+camera:
+  - platform: generic
+    name: Living Room
+    still_image_url: https://livingcamera/cgi-bin/currentpic.cgi
+    stream_source: rtsp://livingcamera:8554/unicast
+    verify_ssl: false
+    username: !secret living_camera_username
+    password: !secret living_camera_password
+    authentication: basic
+  - platform: generic
+    name: Family Room
+    still_image_url: https://livingcamera/cgi-bin/currentpic.cgi
+    stream_source: rtsp://familyroom:fam5678@192.168.86.46/live
+
+stream:
+
+cloudflare:
+  email: !secret cloudflare_email
+  api_key: !secret cloudflare_api_key
+  zone: !secret domain
+  records:
+    - home
+    
+lifx:
+
+light:
+  - platform: switch
+    name: Living Main
+    entity_id: switch.living_main_light
+  - platform: switch
+    name: Living TV
+    entity_id: switch.living_tv_light
+  - platform: switch
+    name: Hall
+    entity_id: switch.hall_light
+    
+custom_updater:
+  track:
+    - cards
+    - components
+  card_urls:
+    - https://raw.githubusercontent.com/kalkih/mini-media-player/master/tracker.json
+    - https://raw.githubusercontent.com/kuuji/button-card/master/tracker.json
+  
+
 # Text to speech
 tts:
-  - platform: google
+  - platform: google_translate
+    service_name: google_say
+  - platform: amazon_polly
+    aws_access_key_id: !secret aws_access_key_id
+    aws_secret_access_key: !secret aws_secret_access_key
 
 group: !include groups.yaml
+google_assistant: !include google_assistant.yaml
 automation: !include_dir_merge_list automation
+input_boolean: !include input_boolean.yaml
 binary_sensor: !include binary_sensors.yaml
-device_tracker: !include device_trackers.yaml
-light: !include lights.yaml
 media_player: !include media_players.yaml
+proximity: !include proximity.yaml
 script: !include scripts.yaml
 sensor: !include sensors.yaml
 switch: !include switches.yaml

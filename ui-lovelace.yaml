@@ -1,0 +1,144 @@
+title: My Awesome Home
+
+# Include external resources
+resources:
+  - url: /customcards/tracker-card.js
+    type: js
+  - url: /customcards/mini-media-player-bundle.js
+    type: module
+  - url: /customcards/button-card.js
+    type: module
+
+views:
+  - title: Example
+    id: example
+    background: white
+    cards:
+      - id: b757c8f75bb5456d873cf4e4f140f955  # Automatically created id
+        type: entity-filter
+        entities:
+          - group.negros_tracker
+          - group.marias_tracker
+        state_filter:
+          - home
+        card:
+          type: glance
+      - type: conditional
+        conditions:
+          - entity: lock.front_door
+            state: locked
+        card:
+          type: 'custom:button-card'
+          action: service
+          service:
+            domain: lock
+            action: unlock
+            data:
+              entity_id: lock.front_door
+          card_style: ''
+          color: var(--primary-color)
+          color_type: icon
+          default_color: var(--primary-text-color)
+          icon: mdi:lock
+          name: Unlock
+          size: 40%
+      - type: conditional
+        conditions:
+          - entity: lock.front_door
+            state: unlocked
+        card:
+          type: 'custom:button-card'
+          action: service
+          service:
+            domain: lock
+            action: lock
+            data:
+              entity_id: lock.front_door
+          card_style: ''
+          color: var(--paper-item-icon-color)
+          color_type: icon
+          default_color: var(--primary-text-color)
+          icon: mdi:lock-open-outline
+          name: Lock
+          size: 40%
+      - type: horizontal-stack
+        cards:
+          - type: custom:button-card
+            name: Terrace
+            entity: group.terrace_lights
+            icon: mdi:lightbulb
+            action: toggle
+          - type: custom:button-card
+            name: Outside
+            entity: group.outside_lights
+            icon: mdi:lightbulb
+            action: toggle
+      - id: 6cc67209a00f4ff895601bb3e9794afa  # Automatically created id
+        type: thermostat
+        entity: climate.house_heating
+      - type: horizontal-stack
+        cards:
+          - id: 38287df84be54185b370c6f339d74111  # Automatically created id
+            type: sensor
+            entity: sensor.master_bedroom_luminance
+            name: Master Bedroom Illumination
+            height: 75
+            line_color: '#3498db'
+          - id: 3d12e222c95d4b82be1987ccf538ee83  # Automatically created id
+            type: sensor
+            entity: sensor.master_bedroom_temperature
+            name: Master Bedroom Temperature
+            height: 75
+            line_color: '#3498db'
+      - type: horizontal-stack
+        cards:
+          - type: sensor
+            entity: sensor.family_room_luminance
+            name: Family Room Illumination
+            height: 75
+            line_color: '#3498db'
+          - type: sensor
+            entity: sensor.family_room_temperature
+            name: Family Room Temperature
+            height: 75
+            line_color: '#3498db'
+
+  - title: Living Room
+    path: living_room
+    cards:
+      - type: picture-glance
+        title: Living room
+        entities:
+          - light.living_main
+          - light.living_tv
+          - sensor.living_luminance
+          - sensor.living_temperature
+        camera_image: camera.living_room 
+        camera_view: live
+      - type: picture-glance
+        title: Family room
+        entities:
+          - sensor.living_temperature
+        camera_image: camera.family_room
+      - type: custom:mini-media-player
+        entity: media_player.living_music
+        name: Living Music
+        artwork: full-cover-fit
+        power_color: true
+        show_progress: true
+
+  - icon: mdi:home-assistant
+    title: Second view
+    cards:
+      - type: entities
+        title: Example
+        entities:
+          - light.kitchen
+          - switch.ac
+          - entity: light.living_room
+            name: LR Lights
+      - type: custom:tracker-card
+        title:
+        trackers:
+          - sensor.custom_card_tracker
+          - sensor.custom_component_tracker

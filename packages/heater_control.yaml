@@ -1,0 +1,89 @@
+climate:
+  - platform: generic_thermostat
+    name: House Heating
+    heater: switch.heater
+    target_sensor: sensor.house_mean_temperature
+    initial_operation_mode: "auto"
+    min_temp: 15
+    max_temp: 24
+    ac_mode: False
+    away_temp: 17
+
+weather:
+  - platform: darksky
+    api_key: !secret darksky_api_key
+
+sensor:
+  - platform: darksky
+    api_key: !secret darksky_api_key
+    monitored_conditions:
+      - summary
+      - icon
+      - nearest_storm_distance
+      
+binary_sensor:
+  - platform: trend
+    sensors:
+      home_temp_falling:
+        entity_id: sensor.house_mean_temperature
+        sample_duration: 7200
+        invert: true
+        device_class: cold
+
+      home_temp_rising:
+        entity_id: sensor.house_mean_temperature
+        sample_duration: 7200
+        device_class: heat
+    
+automation:
+  - alias: "Heat Control | Set thermostat to away when not home"
+    trigger:
+      platform: state
+      entity_id:
+        - group.all_persons
+      to: 'not_home'
+      for:
+        minutes: 2
+    action:
+      service: climate.set_away_mode
+      data: 
+        entity_id: climate.house_heating
+        away_mode: true
+  - alias: "Heat Control | Set thermostat to not away when home"
+    trigger:
+      platform: state
+      entity_id:
+        - group.all_persons
+      to: 'home'
+      for:
+        minutes: 2
+    action:
+      service: climate.set_away_mode
+      data: 
+        entity_id: climate.house_heating
+        away_mode: false
+  - alias: "Heat Controler | Notification action click set away off"
+    trigger:
+      platform: event
+      event_type: html5_notification.clicked
+      event_data:
+        action: set_away_mode_off
+    action:
+      - service: climate.set_away_mode
+        data: 
+          entity_id: climate.house_heating
+          away_mode: false
+
+script:
+  thermostat_ask_to_set_away_mode_off:
+    sequence:
+    - service: notify.web
+      data_template:
+        message: "Coming Home? The current temperature is {{ state_attr('climate.house_heating', 'current_temperature') }}º at home, do you want set away mode off ahead of time?."
+        data:
+          tag: heating_away_notification
+          actions:
+            - action: set_away_mode_off
+              title: "Turn off away mode"
+              
+            

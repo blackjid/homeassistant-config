@@ -1,0 +1,81 @@
+- alias: Outside Lights | Turn off at night
+  trigger:
+    - platform: time
+      at: '23:30:00'
+  action:
+    - service: light.lifx_set_state
+      data:
+        entity_id: group.outside_lights
+        power: off
+        transition: 60
+        
+- alias: Outside Lights | Turn on at dusk
+  trigger:
+    - platform: sun
+      event: sunset
+      offset: "00:30:00"
+  action:
+    - service: light.lifx_set_state
+      data:
+        entity_id: group.outside_lights
+        power: on
+        transition: 60
+        
+- alias: Outside Lights | Turn on in the morning
+  trigger:
+    - platform: time
+      at: '6:30:00'
+  action:
+    - service: light.lifx_set_state
+      data:
+        entity_id: group.outside_lights
+        power: on
+        transition: 60
+        
+- alias: Outside Lights | Turn off at dawn
+  trigger:
+    - platform: sun
+      event: sunrise
+      offset: '-00:30:00'
+  action:
+    - service: light.lifx_set_state
+      data:
+        entity_id: group.outside_lights
+        power: off
+        transition: 60
+
+- alias: Outside Lights | Turn on when door unlocked
+  trigger:
+    - platform: state
+      entity_id: lock.front_door
+      to: 'unlocked'
+      from: 'locked'
+  condition:
+    - condition: state
+      entity_id: sun.sun
+      state: 'below_horizon'
+  action:
+    - service: light.lifx_set_state
+      data:
+        entity_id: group.outside_lights
+        power: on
+        transition: 20
+        
+- alias: Outside Lights | Turn off when door locked
+  trigger:
+    - platform: state
+      entity_id: lock.front_door
+      to: 'locked'
+      from: 'unlocked'
+      for:
+        minutes: 5
+  condition:
+    - condition: state
+      entity_id: sun.sun
+      state: 'below_horizon'
+  action:
+    - service: light.lifx_set_state
+      data:
+        entity_id: group.outside_lights
+        power: off
+        transition: 60
