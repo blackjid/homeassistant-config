@@ -1,10 +1,32 @@
+# Ignore OS files and folders
+/.Trash*/
+
+# Generic ignores
 *.log
+*.log.*
 *.db
-.spotify-token-cache
-.uuid
+*.db-shm
+*.db-wal
+*.pyc
+._*
+__pycache__
 
-/www/ignored/*
+# Directory (contents) ignores
+/*.conf
+/deps
+/.storage
+/tts
+/.vscode
 
-known_devices.yaml
-emulated_hue_ids.json
-secrets.yaml
+# Specific file ignores
+/.uuid
+/ip_bans.yaml
+/known_devices.yaml
+/secrets.yaml
+/google_service_account.json
+
+# Ignore snapshot images
+/www/images/snapshots
+
+# Specific keeps
+!.gitkeep
