@@ -1,0 +1,16 @@
+---
+# The http component serves all files and data required for the
+# Home Assistant frontend.
+#
+# https://www.home-assistant.io/components/http/
+#
+
+http:
+  server_host: 0.0.0.0
+  ip_ban_enabled: true
+  login_attempts_threshold: 5
+  trusted_proxies: 
+    - 10.2.1.1
+    - 10.42.5.142
+    - 10.0.0.0/8
+  use_x_forwarded_for: true

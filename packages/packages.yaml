@@ -1,0 +1,10 @@
+home_assistant: !include home_assistant/package.yaml
+
+# Ugly hack because integrations require `include_dir_merge_named` but
+# won't work from inside a nested package 
+# https://github.com/bjw-s/hass-config/blob/1186fdd4a31d0f571d95412fa30546267b3dc384/config_packages/packages.yaml
+home_assistant_integrations: !include_dir_merge_named home_assistant/integrations
+
+notifications: !include notifications/package.yaml
+
+area_terrace: !include zones/terrace/package.yaml

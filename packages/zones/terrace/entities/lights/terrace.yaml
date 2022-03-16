@@ -1,0 +1,7 @@
+---
+platform: group
+name: Terrace - Wall
+entities:
+  - light.terrace_1
+  - light.terrace_2
+  - light.terrace_3

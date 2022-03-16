@@ -1,0 +1,20 @@
+---
+# The lifx integration allows you to integrate your LIFX into Home Assistant.
+#
+# https://www.home-assistant.io/integrations/lifx/
+#
+
+lifx:
+  light:
+    - broadcast: 10.0.2.81
+    - broadcast: 10.0.2.82
+    - broadcast: 10.0.2.83
+    - broadcast: 10.0.2.84
+    - broadcast: 10.0.2.85
+    - broadcast: 10.0.2.86
+    - broadcast: 10.0.2.87
+    - broadcast: 10.0.2.88
+    - broadcast: 10.0.2.89
+    # - broadcast: 10.0.2.90
+    - broadcast: 10.0.2.91
+    - broadcast: 10.0.2.92

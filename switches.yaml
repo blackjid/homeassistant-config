@@ -1,8 +1,0 @@
-# Tplink
-- platform: tplink
-  name: !secret switch_tplink_1_name
-  host: !secret switch_tplink_1_host
-
-- platform: tplink
-  name: !secret switch_tplink_2_name
-  host: !secret switch_tplink_2_host
