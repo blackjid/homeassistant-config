@@ -14,4 +14,3 @@ homeassistant:
 
   # Load packages
   packages: !include packages/packages.yaml
-
