@@ -1,0 +1,9 @@
+---
+# The androidtv platform allows you to control an Android TV device or Amazon Fire TV device.
+#
+# https://www.home-assistant.io/integrations/androidtv/
+
+androidtv:
+  media_player:
+    name: Nvidia Shiled ADB
+    host: !secret nvidia_shield_ip
