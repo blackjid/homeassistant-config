@@ -5,3 +5,8 @@ google_assistant:
   exposed_domains:
     - switch
     - light
+  entity_config:
+    # Expose script as a scene on google assistant to automate with voice command
+    script.remote_finder_living_room:
+      expose: true
+
