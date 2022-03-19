@@ -6,5 +6,5 @@
 
 logger:
   default: info
-  logs:
-    # homeassistant.components.denonavr: debug
+  # logs:
+  #   homeassistant.components.denonavr: debug
