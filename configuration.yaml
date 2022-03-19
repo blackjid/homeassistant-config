@@ -9,8 +9,8 @@ homeassistant:
   unit_system: metric
   time_zone: America/Santiago
 
-  # external_url: !env_var SECRET_EXTERNAL_URL
-  # internal_url: !env_var SECRET_INTERNAL_URL
+  external_url: !env_var SECRET_EXTERNAL_URL
+  internal_url: !env_var SECRET_INTERNAL_URL
 
   # Load packages
   packages: !include packages/packages.yaml
