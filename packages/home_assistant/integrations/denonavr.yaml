@@ -1,0 +1,8 @@
+---
+# The denonavr platform allows you to control Denon Network Receivers from Home Assistant. It might be that your device is supported by the Denon platform.
+#
+# https://www.home-assistant.io/integrations/denonavr/
+
+# denonavr:
+#   media_player:
+#     host: 10.0.2.13
