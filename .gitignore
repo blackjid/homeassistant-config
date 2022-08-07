@@ -29,4 +29,8 @@ __pycache__
 /www/images/snapshots
 
 # Specific keeps
-!.gitkeep
+!.gitkee
+
+# Ignore HACS managed custom_components
+/custom_components/hacs
+/custom_components/ble_monitor/
