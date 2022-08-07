@@ -1,0 +1,9 @@
+---
+# The ble_monitor platform allows track and parse bluetooth devices advertising information
+#
+# https://custom-components.github.io/ble_monitor/
+
+# Enable on the ui 
+
+# ble_monitor:
+#   bt_interface: 'disable'

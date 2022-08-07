@@ -7,4 +7,5 @@
 logger:
   default: info
   # logs:
+  #   custom_components.ble_monitor: debug
   #   homeassistant.components.denonavr: debug
