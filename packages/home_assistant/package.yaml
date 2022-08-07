@@ -1,3 +1,2 @@
 automation: !include_dir_list automations
 input_text: !include_dir_merge_named input_texts
-script: !include_dir_merge_named scripts
