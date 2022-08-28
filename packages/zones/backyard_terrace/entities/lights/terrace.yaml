@@ -1,0 +1,8 @@
+---
+platform: group
+name: Terrace - Wall
+unique_id: terrace_wall_lights_group
+entities:
+  - light.terrace_1
+  - light.terrace_2
+  - light.terrace_3

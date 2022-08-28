@@ -1,0 +1,7 @@
+---
+platform: group
+name: Backyard
+unique_id: backyard_lights_group
+entities:
+  - light.terrace
+  - light.pool

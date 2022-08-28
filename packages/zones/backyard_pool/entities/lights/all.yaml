@@ -1,0 +1,7 @@
+---
+platform: group
+name: Pool
+unique_id: pool_lights_group
+entities:
+  - light.pool_lights_back
+  - light.pool_lights_stairs
