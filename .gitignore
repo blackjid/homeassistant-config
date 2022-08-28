@@ -32,6 +32,5 @@ __pycache__
 # Specific keeps
 !.gitkee
 
-# Ignore HACS managed custom_components
-/custom_components/hacs
-/custom_components/ble_monitor/
+# Ignore custom_components
+/custom_components
