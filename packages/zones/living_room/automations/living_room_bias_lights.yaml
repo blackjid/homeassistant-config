@@ -1,0 +1,17 @@
+---
+id: living_room_toogle_bias_lights
+alias: Living Room | Toggle Bias Lights when dark
+trigger:
+  - platform: state
+    entity_id: media_player.vizio_smartcast
+condition: # 'when dark' condition: either after sunset or before sunrise
+  - condition: state
+    entity_id: sun.sun
+    state: 'below_horizon'
+action:
+  - service: light.lifx_set_state
+    data_template:
+      entity_id: light.tv_bias
+      power: '{{ states("media_player.vizio_smartcast") }}'
+      brightness: 63
+      color_temp: 307

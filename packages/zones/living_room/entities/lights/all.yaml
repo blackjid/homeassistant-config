@@ -1,0 +1,7 @@
+---
+platform: group
+name: Living Room
+unique_id: living_room_lights_group
+entities:
+  - light.living_room_main_tv
+  - light.living_room_main_hall
