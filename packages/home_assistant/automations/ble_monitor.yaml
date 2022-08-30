@@ -1,4 +1,5 @@
 alias: ESPHome BLE Advertise
+id: ble_parse_data
 mode: queued
 trigger:
   - platform: event
@@ -7,4 +8,4 @@ action:
   - service: ble_monitor.parse_data
     data:
       packet: "{{ trigger.event.data.packet }}"
-      gateway_id: "{{ trigger.event.data.gateway_id }}" # Optional. If your gateway sends.
+      gateway_id: "{{ trigger.event.data.gateway_id if trigger.event.data.gateway_id is defined else 'unknown' }}"
