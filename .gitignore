@@ -34,3 +34,5 @@ __pycache__
 
 # Ignore custom_components
 /custom_components
+
+watchman_report.txt
