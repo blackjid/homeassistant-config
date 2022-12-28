@@ -3,6 +3,5 @@
 #
 # https://www.home-assistant.io/integrations/denonavr/
 
-# denonavr:
-#   media_player:
-#     host: 10.0.2.13
+denonavr:
+  media_player:
