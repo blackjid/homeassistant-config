@@ -1,0 +1,9 @@
+---
+platform: command_line
+switches:
+  receiver_volume_limit:
+    command_on: '/usr/bin/curl "http://10.0.2.13/SETUP/AUDIO/VOLUME/s_audio.asp" -H "Content-Type: application/x-www-form-urlencoded" -H "Cookie: ZoneName=MAIN"%"20ZONE" --data-raw "radioMainVolLimit=-10dB"'
+    command_off: '/usr/bin/curl "http://10.0.2.13/SETUP/AUDIO/VOLUME/s_audio.asp" -H "Content-Type: application/x-www-form-urlencoded" -H "Cookie: ZoneName=MAIN"%"20ZONE" --data-raw "radioMainVolLimit=OFF"'
+    command_state: '/usr/bin/curl -s "http://10.0.2.13/SETUP/AUDIO/VOLUME/d_audio.asp" -H "Cookie: ZoneName=MAIN"%"20ZONE" | grep radioMainVolLimit | tr "<INPUT" "\n<INPUT" | grep checked | cut -d ">" -f 2'
+    value_template: '{{ value != "Off" }}'
+    friendly_name: Receiver Volume Limit
