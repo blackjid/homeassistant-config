@@ -7,9 +7,9 @@ home_assistant_integrations: !include_dir_merge_named home_assistant/integration
 
 notifications: !include notifications/package.yaml
 
-house: !include zones/house/package.yaml
+house: !include areas/house/package.yaml
 
-area_backyard: !include zones/backyard/package.yaml
-area_backyard_pool: !include zones/backyard_pool/package.yaml
-area_backyard_terrace: !include zones/backyard_terrace/package.yaml
-area_living_room: !include zones/living_room/package.yaml
+area_backyard: !include areas/backyard/package.yaml
+area_backyard_pool: !include areas/backyard_pool/package.yaml
+area_backyard_terrace: !include areas/backyard_terrace/package.yaml
+area_living_room: !include areas/living_room/package.yaml
