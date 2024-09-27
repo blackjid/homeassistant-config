@@ -1,0 +1,74 @@
+input_datetime:
+  ruby_last_fed:
+    name: Ruby Last Fed
+    has_date: true
+    has_time: true
+
+automation:
+  - alias: 'Update Ruby Last Fed Time'
+    id: 20d22041-9c0e-41a0-85b0-7943da02d6a6
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.ruby_food_lid
+        from: 'off'
+        to: 'on'
+    action:
+      - service: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.ruby_last_fed
+        data:
+          datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+sensor:
+  - platform: time_date
+    display_options:
+      - 'time'
+
+template:
+  - sensor:
+      - name: "Ruby Feeding Status"
+        unique_id: 0d8bc46d-804e-4fe2-a78c-44263e261db9
+        state: >
+          {% set time = states('sensor.time') %}
+          {% set now = now() %}
+          {% set tz = now.tzinfo %}
+          {% set last_fed_str = states('input_datetime.ruby_last_fed') %}
+          {% if last_fed_str %}
+            {% set last_fed = strptime(last_fed_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=tz) %}
+          {% else %}
+            {% set last_fed = None %}
+          {% endif %}
+          {% set morning_start = now.replace(hour=7, minute=0, second=0, microsecond=0) %}
+          {% set morning_end = now.replace(hour=11, minute=0, second=0, microsecond=0) %}
+          {% set evening_start = now.replace(hour=18, minute=0, second=0, microsecond=0) %}
+          {% set evening_end = now.replace(hour=21, minute=0, second=0, microsecond=0) %}
+
+          {% if morning_start <= now < morning_end %} {## Morning Window ##}
+            {% if last_fed and morning_start <= last_fed < morning_end %}
+              Ruby has been fed this morning.
+            {% else %}
+              It is time to feed Ruby.
+            {% endif %}
+          {% elif morning_end <= now < evening_start %} {## During the day ##}
+            {% if last_fed and morning_start <= last_fed < morning_end %}
+              Ruby has been fed this morning.
+            {% else %}
+              Ruby is starving! You forgot to feed Ruby this morning.
+            {% endif %}
+          {% elif evening_start <= now < evening_end %} {## Evening Window ##}
+            {% if last_fed and evening_start <= last_fed < evening_end %}
+              Ruby has been fed this evening.
+            {% else %}
+              It is time to feed Ruby.
+            {% endif %}
+          {% else %} {## During the night ##}
+            {% if last_fed and evening_start <= last_fed < evening_end %}
+              Ruby has been fed this evening.
+            {% elif last_fed and morning_start <= last_fed < morning_end %}
+              Ruby is starving! You forgot to feed Ruby this evening.
+            {% else %}
+              Ruby is starving! You forgot to feed Ruby today.
+            {% endif %}
+          {% endif %}
+        attributes: 
+          ruby_last_fed: "{{ states('input_datetime.ruby_last_fed') | as_datetime | time_since }} ago"
