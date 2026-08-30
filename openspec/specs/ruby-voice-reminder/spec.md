@@ -7,8 +7,61 @@ outstanding, and brings the matching chore onto the display so the spoken remind
 point at. A supplement to the display, not a replacement — the display is ambient and easy to stop
 seeing.
 
-Design rationale — the sticky-sensor trigger, the two silent-failure traps, and why the quota reset
-has no start-up trigger — lives in `docs/specs/ruby-voice-reminder.md`.
+
+## Why It Is Built This Way
+
+**The trigger is a sighting, not a change of identity.** The camera's recognition result is sticky:
+it holds the last recognised name, potentially for hours. Reacting to that value changing means
+reacting only when a *different* person appears — and the most common real case, the same child
+walking past twice, produces no change at all. The automation reacts to the per-sighting timestamp
+instead. This is the single most important detail here: keying off the identity looks correct,
+passes a casual test with two people, and then under-fires in production in a way nobody notices.
+
+**Two limits exist because they do different jobs.** A cap on announcements per period controls
+total volume. A minimum interval controls bunching. Neither substitutes for the other: a minimum
+interval alone permits dozens of announcements a day, and a cap alone is spent within seconds of a
+family gathering, because the recognition result flips between names several times a second when
+more than one person is in frame.
+
+**The allowance is not refilled on start-up, deliberately.** The two failure modes are not
+symmetric. A missed refill means fewer announcements, which is harmless. A refill on every restart
+means more announcements than intended, which is the exact failure this feature exists to avoid.
+Restarts are common, so the trigger is omitted.
+
+**Everything is a gate; nothing is a fallback.** Uncertainty produces silence. There is no default
+path and no "announce anyway" branch.
+
+**Two silent-failure traps, both of which look like success from the inside.** They are the reason
+this capability insists on a verified, self-powered speaker:
+
+- A playback target that is only a streaming endpoint will accept audio and report itself as playing
+  for the full duration, even when the equipment it feeds is switched off. Every observable signal
+  short of a person in the room says the announcement worked.
+- A speech voice outside the current subscription tier is rejected *after* the request has already
+  returned success, because generation is streamed. The rejection reaches the log and nothing else.
+
+Both were found only by reading logs after a human said they had heard nothing. Neither can be
+caught by asserting that playback occurred — which is why no test here should do so.
+
+**The spoken name is not the identifier.** One child's name carries an accent. The value used to
+match against the camera must stay unaccented, because that is exactly the string the camera
+produces; accenting it would silently stop her ever matching. The accent is applied only at the
+point of speech. Generally: an identifier shared with another system should never carry
+presentational changes.
+
+**Recognition frequency is very uneven between family members**, by more than an order of magnitude,
+depending on where each person tends to be. The spoken layer will fire noticeably less during the
+fortnight of a child the camera sees rarely. That is a camera-placement problem, not something the
+automation can correct, and it is the reason this remains a supplement to the display rather than a
+replacement.
+
+**Practical notes for anyone debugging this.** The display changes within milliseconds of a sighting
+and speech follows about four seconds later, that gap being synthesis plus the speaker waking; a
+person perceiving more delay than that is seeing the camera's own recognition pipeline, which is
+upstream. Error counts in logs overstate failures badly, because one rejected request retries
+several times. And a busy room can generate enough rejected runs to push the interesting one out of
+the stored execution history within seconds, so prefer the counter, the interval timer and the
+last-run timestamp over hunting for a trace.
 
 ## Requirements
 

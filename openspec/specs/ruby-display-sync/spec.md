@@ -5,8 +5,38 @@
 Mirrors chore status onto the pixel display in the living room, so an outstanding chore is visible
 without opening an app. Reads the chore status capabilities and never computes status itself.
 
-Design rationale — the notification-versus-app distinction, the transport choice, and the
-resync-on-restart requirement — lives in `docs/specs/ruby-care-system.md`.
+
+## Why It Is Built This Way
+
+**Persistent versus transient is the central decision, and it is about hardware.** The display is a
+small microcontroller that re-renders every entry in its rotation on every pass. A persistent entry
+is therefore a real running cost, spent only where persistence is the point: something that needs
+attention until it is dealt with. Anything already resolved — a thank-you, an announcement — is
+transient and leaves nothing behind.
+
+**The display is driven over a message broker, not over HTTP.** The home automation system cannot
+reliably reach the device directly: it holds an interface on the device's network, but source-based
+routing keeps that subnet out of the routing table its own outbound connections consult, so they
+leave by the wrong path and time out. The device holds a persistent outbound connection to the
+broker, so that gap is never touched. This was not discovered by design — the previous firmware was
+broker-driven, so the routing gap had always existed and had simply never been exercised.
+
+**The device forgets its entries when it reboots.** Nothing else would re-send them, so a stale
+entry could outlive its cause or a live one vanish silently. Resynchronising on start fixes both
+directions; the thank-you is suppressed on that path so a restart does not congratulate anyone.
+
+**Updating only on a real change is not an optimisation.** A status entity here emits update events
+whose value has not changed, several times an hour. Without comparing values, the device is
+re-rendered repeatedly for no reason.
+
+**The payload contract is strict.** Keys are rejected wholesale rather than ignored — an unknown key
+fails the entire message — and durations are milliseconds. Icons are files stored on the device and
+referenced by name, so messages stay small; sending image data inline on every update would be far
+more expensive for the device to handle.
+
+**A deleted entry leaves its position behind.** The device remembers the slot so a returning entry
+reappears in the same place. It shows up as an empty entry in the device's own interface. This is
+cosmetic and expected, not a leak.
 
 ## Requirements
 

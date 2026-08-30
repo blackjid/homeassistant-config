@@ -5,7 +5,22 @@
 Derives whether the backyard needs picking up, on a daily expectation, escalating when it has been
 skipped. Mirrors the shape of feeding status so both chores behave consistently.
 
-Design rationale lives in `docs/specs/ruby-care-system.md`.
+
+## Why It Is Built This Way
+
+**Escalation ignores the reminder window on purpose.** The window exists to avoid nagging about a
+chore during hours when nobody would do it. Once the chore is genuinely overdue, the time of day
+stops being a good reason to stay quiet, so the escalated state is reported whenever it applies.
+
+**The reminder window is its own entity rather than a time comparison inside the status.** That
+makes the boundary something a person can see, test and change without touching the logic that
+consumes it, and it means the status re-evaluates when the window opens rather than only when
+something else happens to change.
+
+**Anything deriving from the clock needs something to react to.** A status that compares dates only
+re-evaluates when one of the entities it reads changes. Without a regularly ticking input, a day
+rolling over at midnight goes unnoticed until some unrelated change happens to wake it, which can
+delay an escalation by most of a day.
 
 ## Requirements
 

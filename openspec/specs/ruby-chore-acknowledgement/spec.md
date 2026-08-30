@@ -6,8 +6,31 @@ Records that a chore has been done. Feeding is recorded automatically when the f
 opened; either chore can also be acknowledged by hand from the display, which is the fallback for
 when the container sensor does not fire.
 
-Design rationale, including why the button is guarded by the displayed app rather than a mode
-flag, lives in `docs/specs/ruby-care-system.md`.
+
+## Why It Is Built This Way
+
+**The acknowledge button is guarded by what is on screen, not by a mode.** Overloading a shared
+physical control is only safe if the guard is something already visible to the person pressing it.
+The displayed chore is exactly that: you press the button while looking at the thing you are
+acknowledging. A mode flag someone has to set first would be worse than no shortcut at all.
+
+**There is no default branch.** An unrecognised app is a no-op rather than falling through to
+acknowledge whichever chore was checked last. Getting this wrong would silently mark chores done at
+random.
+
+**The manual path exists because the automatic one is unreliable.** The food container sensor does
+not always fire, and a missed feeding record produces a false reminder — which erodes trust in every
+other reminder the system makes. Both paths write the same timestamp so nothing downstream can tell
+them apart; this is a fallback, not a parallel system.
+
+**One automation covers both chores.** "Acknowledge whatever is on screen" is a single idea, so a
+third chore is a new branch rather than a new automation.
+
+**A caution learned the hard way.** Because the display can be driven to a chore programmatically,
+any automated test that does so leaves that chore one button press from being marked done. This has
+already happened once: a chore that had not been done was recorded as complete during an unrelated
+test. Anything that forces the display must restore chore timestamps afterwards, not just its own
+state.
 
 ## Requirements
 

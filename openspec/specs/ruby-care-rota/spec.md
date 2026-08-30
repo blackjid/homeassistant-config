@@ -6,8 +6,28 @@ Assigns responsibility for the dog's chores to exactly one child at a time, adva
 predictable schedule without anyone having to remember to change it. Every other Ruby capability
 reads the current turn to decide who to name.
 
-Design rationale, including why rotation is time-driven rather than chore-driven, lives in
-`docs/specs/ruby-care-system.md`.
+
+## Why It Is Built This Way
+
+**Rotation is driven by the calendar, not by chores being done.** An earlier version advanced the
+turn each time a feeding was recorded. That is wrong for a subtle reason: the feeding status
+reports the dog as fed *optimistically*, before a feeding window opens, so a status of "fed" is not
+evidence that anybody fed her. Anything keyed off that transition rotates on days nobody did
+anything.
+
+**The block marker is what makes rotation safe to evaluate often.** Rotation is checked daily and
+again whenever the system starts. Without recording which block has already been rotated for, every
+restart inside a block would advance the turn and quietly rob a child of their fortnight. With the
+marker, evaluation is idempotent and can run as often as convenient.
+
+**An empty marker means bootstrap, not "rotate now".** On a fresh install the marker is recorded and
+the turn is left alone, so standing the system up does not jerk the rota forward.
+
+**One child owns both chores.** An earlier version offset yard duty by one, so the two chores never
+landed on the same person. That was the right shape when the turn moved several times a day; with a
+half-month block it splits ownership of a single fortnight between two children, which is harder to
+reason about than it is fair. Yard duty is now derived as the identity of the care turn, kept as a
+named derivation rather than a direct read so the offset can be restored in one place.
 
 ## Requirements
 

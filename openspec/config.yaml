@@ -13,10 +13,11 @@ context: |
   - Specs here are therefore the durable record. The running config is the source of
     truth for behaviour; these specs are the source of truth for intent.
 
-  Design rationale for the Ruby capabilities lives in docs/specs/ as long-form prose.
-  Those documents carry the failure modes and the reasoning behind non-obvious choices,
-  which the requirement format below cannot hold. Read them before changing a Ruby
-  capability - several decisions look wrong until you know what went wrong first.
+  Each capability spec carries a "Why It Is Built This Way" section between Purpose and
+  Requirements. It holds the failure modes and the reasoning behind non-obvious choices.
+  Read it before changing a capability - several requirements look wrong, or look like
+  they could be simplified, until you know what went wrong first. When a change alters
+  the reasoning and not just the behaviour, update that section too.
 
   Two recurring hazards in this house, both of which look like success from inside
   Home Assistant:
@@ -30,7 +31,8 @@ rules:
   specs:
     - Requirements describe observable household behaviour, never entity ids or
       automation structure.
-    - Anything a family member cannot observe belongs in docs/specs/, not here.
+    - Anything a family member cannot observe belongs under "Why It Is Built This Way",
+      not in a requirement.
 
 # Project context (optional)
 # This is shown to AI when creating artifacts.
