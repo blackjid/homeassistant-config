@@ -1,0 +1,64 @@
+schema: spec-driven
+
+context: |
+  This repository is a Home Assistant configuration, not an application codebase.
+  "Implementation" means entities, helpers and automations, not source files.
+
+  Where things live:
+  - Automations and UI-managed helpers live in Home Assistant's own storage and are
+    edited through its UI or config API. They are deliberately NOT version controlled,
+    because the household needs to review and adjust them in the UI.
+  - A small amount of YAML remains under packages/ for things the UI cannot express,
+    notably template sensors that expose custom attributes.
+  - Specs here are therefore the durable record. The running config is the source of
+    truth for behaviour; these specs are the source of truth for intent.
+
+  Design rationale for the Ruby capabilities lives in docs/specs/ as long-form prose.
+  Those documents carry the failure modes and the reasoning behind non-obvious choices,
+  which the requirement format below cannot hold. Read them before changing a Ruby
+  capability - several decisions look wrong until you know what went wrong first.
+
+  Two recurring hazards in this house, both of which look like success from inside
+  Home Assistant:
+  - A playback target can report "playing" while producing no sound, if it depends on
+    separate powered equipment.
+  - A speech request can be rejected after the service call has already returned
+    success, leaving the failure only in the log.
+  Never treat a successful service call as evidence that something was seen or heard.
+
+rules:
+  specs:
+    - Requirements describe observable household behaviour, never entity ids or
+      automation structure.
+    - Anything a family member cannot observe belongs in docs/specs/, not here.
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

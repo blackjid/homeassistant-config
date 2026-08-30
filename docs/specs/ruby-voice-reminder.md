@@ -370,6 +370,16 @@ complete. A harness must restore chore timestamps, not just the limit helpers.
   global voice-settings step may expose it, at the cost of applying to every use of the engine.
 - **Fixing uneven face detection.** A camera-placement and training problem, not an automation one.
 
+## Machine-readable requirements
+
+The requirements distilled from this document live as OpenSpec capabilities under
+`openspec/specs/`: `ruby-care-rota`, `ruby-feeding-status`, `ruby-poop-duty`,
+`ruby-chore-acknowledgement`, `ruby-display-sync` and `ruby-voice-reminder`.
+
+Those specs carry *what must hold*. This document carries *why*, and the failure modes that
+explain the non-obvious choices. Change proposals should update both: the capability spec for the
+requirement, this document when the reasoning changes.
+
 ## Further Notes
 
 **Speech is no longer free.** The earlier translate-based engine cached to disk, so a small set of

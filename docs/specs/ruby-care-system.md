@@ -406,6 +406,16 @@ should ideally run against a display that is not the kitchen one.
 - **Tracking who fed her when the turn-holder did not.** The system credits the turn-holder. A
   sibling covering for another is invisible, and that is accepted.
 
+## Machine-readable requirements
+
+The requirements distilled from this document live as OpenSpec capabilities under
+`openspec/specs/`: `ruby-care-rota`, `ruby-feeding-status`, `ruby-poop-duty`,
+`ruby-chore-acknowledgement`, `ruby-display-sync` and `ruby-voice-reminder`.
+
+Those specs carry *what must hold*. This document carries *why*, and the failure modes that
+explain the non-obvious choices. Change proposals should update both: the capability spec for the
+requirement, this document when the reasoning changes.
+
 ## Further Notes
 
 **The poop pickup timestamp was seeded with an invented value.** There was no true starting value
