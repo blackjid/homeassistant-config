@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hass-mcp": {
+      "type": "http",
+      "url": "https://hass-mcp.blkh.dev/mcp"
+    }
+  }
+}
