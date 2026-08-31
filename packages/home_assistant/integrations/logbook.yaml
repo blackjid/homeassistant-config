@@ -1,0 +1,9 @@
+---
+# The logbook integration provides a different perspective on the history of your house
+#
+# https://www.home-assistant.io/integrations/logger/
+#
+
+logbook:
+  exclude:
+    entities: []

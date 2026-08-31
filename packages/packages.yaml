@@ -13,3 +13,4 @@ area_backyard: !include areas/backyard/package.yaml
 area_backyard_pool: !include areas/backyard_pool/package.yaml
 area_backyard_terrace: !include areas/backyard_terrace/package.yaml
 area_living_room: !include areas/living_room/package.yaml
+area_kitchen: !include areas/kitchen/package.yaml

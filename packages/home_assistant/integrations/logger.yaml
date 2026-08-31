@@ -6,6 +6,8 @@
 
 logger:
   default: info
-  # logs:
-  #   custom_components.ble_monitor: debug
+  logs: #{}
+    homeassistant.components.command_line: debug
+  # custom_components.spotcast: debug
+  # custom_components.ble_monitor: debug
   #   homeassistant.components.denonavr: debug

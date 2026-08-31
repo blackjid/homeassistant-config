@@ -2,12 +2,15 @@ google_assistant:
   project_id: homeassistant-ac7ae
   service_account: !include ../../../google_service_account.json
   report_state: true
+  expose_by_default: true
   exposed_domains:
+    - fan
+    - sensor
     - switch
     - light
     - climate
+    - lock
   entity_config:
     # Expose script as a scene on google assistant to automate with voice command
     script.remote_finder_living_room:
       expose: true
-
