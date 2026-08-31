@@ -1,0 +1,1109 @@
+- id: '1686509637611'
+  alias: Door unlocked
+  description: ''
+  trigger:
+  - platform: device
+    device_id: f931624770046220f8894ca6badd651a
+    domain: lock
+    entity_id: lock.front_door
+    type: unlocked
+  condition:
+  - condition: device
+    device_id: 67f6dbe20d82870dd56609e038922ff9
+    domain: device_tracker
+    entity_id: device_tracker.black_s22
+    type: is_not_home
+  action:
+  - service: notify.mobile_app_black_s22
+    data:
+      message: Se abrió la puerta
+      title: Puerta principal
+  mode: single
+- id: '1690159756242'
+  alias: 'Entrance: Turn off car lights after automation'
+  description: Turn off garage lights after 5 minutes being on. Only if they were
+    turned on by a service (automation)
+  trigger:
+  - platform: state
+    entity_id:
+    - light.garage_green_garden_sconces
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  condition:
+  - condition: template
+    value_template: '{{ states.light.garage_green_garden_sconces.context.parent_id
+      != None }}'
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.garage_green_garden_sconces
+  mode: single
+- id: '1700171683615'
+  alias: Entrance - S22
+  description: ''
+  use_blueprint:
+    path: SgtBatten/Stable.yaml
+    input:
+      camera: camera.backyard
+      notify_device: 67f6dbe20d82870dd56609e038922ff9
+      labels:
+      - person
+      - car
+      message: A Person was detected on the Side camera.
+      debug: true
+- id: '1701693448513'
+  alias: Entrance - Black Work
+  description: ''
+  use_blueprint:
+    path: SgtBatten/Stable.yaml
+    input:
+      camera: camera.entrance
+      notify_device: 89cc7939161fc52bdc6eb6fa3e82dc6d
+      labels:
+      - car
+      - person
+      message: '{{ label }} detected - {{ camera_name }}'
+      debug: true
+      zone_filter: true
+      zones:
+      - parking_lot
+- id: '1721780876782'
+  alias: 'Entrance: Car lights at night'
+  description: Turn on garage lights when someone or a car is spotted and it is already
+    dark outside
+  trigger:
+  - type: turned_on
+    platform: device
+    device_id: f64ea065f446a9b8550e978c289127c9
+    entity_id: binary_sensor.entrance_vehicle
+    domain: binary_sensor
+    id: car_lights
+  - type: turned_on
+    platform: device
+    device_id: f64ea065f446a9b8550e978c289127c9
+    entity_id: binary_sensor.entrance_person
+    domain: binary_sensor
+    id: car_lights
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  action:
+  - action: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      area_id: entrance
+  mode: single
+- id: '1728669307584'
+  alias: Ruby food show notification Living Display
+  description: Mirrors sensor.ruby_feeding_status onto the Pixel Display. A pending
+    feeding is a pushed app (persistent, occupies a loop slot because it needs attention);
+    a completed feeding is a one-shot notification. Also resyncs on HA start so a
+    stale 'starving' app cannot stick on the device, which keeps its own RAM-only
+    app list.
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.ruby_feeding_status
+    id: changed
+  - trigger: homeassistant
+    event: start
+    id: sync
+  conditions:
+  - condition: or
+    conditions:
+    - condition: trigger
+      id: sync
+    - condition: template
+      value_template: '{{ trigger.from_state.state != trigger.to_state.state }}'
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.ruby_feeding_status
+        state: Ruby was fed
+      sequence:
+      - if:
+        - condition: trigger
+          id: changed
+        then:
+        - action: mqtt.publish
+          data:
+            evaluate_payload: false
+            qos: 0
+            retain: false
+            topic: awtrixLiving/cmd/notify
+            payload: '{"text": "Thanks {{ states(''input_select.ruby_care_turn'')
+              }}!! Ruby will be happy!", "icon": "76", "durationMs": 30000, "stack":
+              false, "textColor": "palette", "palette": "Rainbow"}'
+      - action: mqtt.publish
+        data:
+          evaluate_payload: false
+          qos: 0
+          retain: false
+          topic: awtrixLiving/cmd/apps/pushed/rubyfood
+          payload: ''
+      - action: mqtt.publish
+        data:
+          evaluate_payload: false
+          qos: 0
+          retain: false
+          topic: awtrixLiving/cmd/indicators/1
+          payload: ''
+    default:
+    - action: mqtt.publish
+      data:
+        evaluate_payload: false
+        qos: 0
+        retain: false
+        topic: awtrixLiving/cmd/apps/pushed/rubyfood
+        payload: '{"text": "{{ states(''sensor.ruby_feeding_status'') }}", "icon":
+          "5242", "durationMs": 10000, "textColor": "{% if ''starving'' in states(''sensor.ruby_feeding_status'')
+          %}#FF3333{% else %}#FFA500{% endif %}"}'
+    - action: mqtt.publish
+      data:
+        evaluate_payload: false
+        qos: 0
+        retain: false
+        topic: awtrixLiving/cmd/indicators/1
+        payload: '{% if ''starving'' in states(''sensor.ruby_feeding_status'') %}{"color":
+          "#FF0000", "blinkMs": 500}{% else %}{"color": "#FFA500", "blinkMs": 0}{%
+          endif %}'
+  mode: restart
+- id: '1729806184099'
+  alias: Outside Lights - Turn On
+  description: ''
+  triggers:
+  - trigger: time
+    at: '20:00:00'
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      kelvin: 5167
+      brightness_pct: 76
+    target:
+      entity_id:
+      - light.garage_green_garden_sconces
+      - light.entrance_porch
+  mode: single
+- id: '1729806228791'
+  alias: Outside Lights - Turn Off
+  description: ''
+  triggers:
+  - trigger: time
+    at: 08:00:00
+  conditions: []
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id:
+      - light.garage_green_garden_sconces
+      - light.entrance_porch
+    data: {}
+  mode: single
+- id: '1742329310004'
+  alias: New automation
+  description: ''
+  triggers:
+  - domain: mqtt
+    device_id: ec7ac1d44ed8e0fdcc56d58138f66c51
+    type: action
+    subtype: 1_single
+    trigger: device
+  conditions: []
+  actions:
+  - action: light.toggle
+    metadata: {}
+    data: {}
+    target:
+      area_id: pool
+  mode: single
+- id: '1753320916792'
+  alias: Morning Music - Weekdays
+  description: Play morning playlist on weekdays at 6:20 AM
+  triggers:
+  - at: 06:25:00
+    trigger: time
+  conditions:
+  - condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  actions:
+  - action: light.toggle
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.dual_nano_switch
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - action: spotcast.play_media
+    data:
+      media_player:
+        entity_id: media_player.morning
+      spotify_uri: spotify:playlist:37i9dQZF1DXcgZcN2HVMoe
+      account: 01K0W21M7XR5XCXHXKE8E8X48D
+      data:
+        shuffle: true
+        volume: 10
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - action: light.turn_on
+    metadata: {}
+    data:
+      color_temp_kelvin: 3363
+      brightness_pct: 37
+      transition: 10
+    target:
+      entity_id: light.lamp
+  mode: single
+- id: '1753548962964'
+  alias: Camera - Send & Save Camera snapshot when if a binary sensor's state turns
+    'off' to 'on', with Conditions
+  description: ''
+  use_blueprint:
+    path: TheRealFalseReality/send_snapshot_conditional.yaml
+    input:
+      sensor: binary_sensor.4_in_1_sensor_motion_detection
+      camera: camera.entrance_fluent
+      notify_device: 67f6dbe20d82870dd56609e038922ff9
+- id: '1759271522906'
+  alias: Night Time
+  description: Play sleepeing babies playlist
+  triggers: []
+  conditions: []
+  actions:
+  - action: spotcast.play_media
+    data:
+      spotify_uri: spotify:playlist:6ajGdGv7pUqs74fZGByjfx
+      account: 01K0W21M7XR5XCXHXKE8E8X48D
+      data:
+        volume: 30
+      media_player:
+        device_id: c36e5f0bbb732975fa876b27ad4f9b4f
+  - action: light.turn_on
+    metadata: {}
+    data:
+      color_temp_kelvin: 2384
+      brightness_pct: 18
+      transition: 10
+    target:
+      entity_id: light.stairs
+  mode: single
+- id: '1770584339374'
+  alias: Living Room | Manage Bias Lights
+  description: Keeps the Bias light synced with the living room TV state after dark.
+    Replaces the stale 55_oled dependency, reacts to sunset/sunrise, and avoids redundant
+    on/off calls.
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.living_room_main_tv
+  - trigger: state
+    entity_id:
+    - media_player.android_tv_192_168_20_164
+  - trigger: sun
+    event: sunset
+    offset: 0
+  - trigger: sun
+    event: sunrise
+    offset: 0
+  conditions: []
+  actions:
+  - variables:
+      is_dark: '{{ is_state(''sun.sun'', ''below_horizon'') }}'
+      tv_power_on: '{{ is_state(''switch.living_room_main_tv'', ''on'') }}'
+      shield_active: '{{ states(''media_player.android_tv_192_168_20_164'') not in
+        [''off'', ''unavailable'', ''unknown''] }}'
+      should_bias_be_on: '{{ is_dark and (tv_power_on or shield_active) }}'
+      bias_is_on: '{{ is_state(''light.bias'', ''on'') }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ should_bias_be_on and not bias_is_on }}'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.bias
+        data:
+          transition: 2
+          brightness_pct: 30
+          color_temp_kelvin: 4700
+    - conditions:
+      - condition: template
+        value_template: '{{ (not should_bias_be_on) and bias_is_on }}'
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.bias
+        data:
+          transition: 4
+    default: []
+  mode: restart
+- id: '1770584693128'
+  alias: Switch Receiver to Chromecast Input when Chomecast playing
+  description: ''
+  triggers:
+  - entity_id:
+    - media_player.chromecastaudio6147
+    to:
+    - 'on'
+    - playing
+    trigger: state
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: media_player.marantz_nr1607
+      state:
+      - TV Audio
+      attribute: source
+    - condition: state
+      entity_id: media_player.55_oled
+      state:
+      - 'on'
+  actions:
+  - data:
+      source: Chromecast
+    action: media_player.select_source
+    target:
+      entity_id: media_player.marantz_nr1607
+- id: '1770585089686'
+  alias: Turn on receiver when chromecast playing
+  description: ''
+  triggers:
+  - entity_id:
+    - media_player.chromecastaudio6147
+    to:
+    - playing
+    - 'on'
+    trigger: state
+  actions:
+  - data:
+      entity_id: media_player.marantz
+    action: media_player.turn_on
+- id: '1770585363953'
+  alias: Turn off receiver when chromecast off
+  description: ''
+  triggers:
+  - entity_id:
+    - media_player.chromecastaudio6147
+    to:
+    - 'off'
+    trigger: state
+  conditions:
+  - condition: state
+    entity_id: media_player.marantz_nr1607
+    state:
+    - Chromecast
+    attribute: source
+  actions:
+  - action: media_player.turn_off
+    target:
+      entity_id:
+      - media_player.marantz_nr1607
+    data: {}
+  mode: single
+- id: '1770941180542'
+  alias: Turn on the lights on TV pause
+  description: ''
+  triggers:
+  - device_id: 0b6b7df7f2028c97c337a19fb743a628
+    domain: media_player
+    entity_id: ac559380f7e398ac8941ed9103e9e76d
+    type: paused
+    trigger: device
+  conditions:
+  - condition: sun
+    after: sunset
+    before: sunrise
+  - condition: state
+    entity_id: input_boolean.movie_night
+    state:
+    - 'on'
+  actions:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.movie_night_paused
+    data:
+      transition: 8
+  mode: single
+- id: '1770942716652'
+  alias: Turn off the lights when playing
+  description: ''
+  triggers:
+  - device_id: 0b6b7df7f2028c97c337a19fb743a628
+    domain: media_player
+    entity_id: ac559380f7e398ac8941ed9103e9e76d
+    type: playing
+    trigger: device
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  - trigger: state
+    entity_id:
+    - input_boolean.movie_night
+    from:
+    - 'off'
+    - 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  conditions:
+  - condition: sun
+    after: sunset
+    before: sunrise
+  - condition: state
+    entity_id: input_boolean.movie_night
+    state:
+    - 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  actions:
+  - action: scene.turn_on
+    metadata: {}
+    target:
+      entity_id: scene.movie_nights
+    data:
+      transition: 7
+  mode: single
+- id: '1770946350298'
+  alias: Movie Night Awtrix notification
+  description: Show "Movie Night!" on the Pixel Display when movie night turns on.
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.movie_night
+    to: 'on'
+  conditions: []
+  actions:
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: awtrixLiving/cmd/notify
+      payload: '{"text": "Movie Night!", "durationMs": 10000, "textColor": "#9D9934",
+        "stack": false}'
+  mode: single
+- id: '1770952525587'
+  alias: Turn on light and end Movie night when TV off
+  description: ''
+  triggers:
+  - device_id: 8cc47a77e4578c0cb6c72d470e357b44
+    domain: media_player
+    entity_id: 798aa2b203a935b6f99d4383176a15ee
+    type: turned_off
+    trigger: device
+  - type: turned_off
+    device_id: 7152e2ff59a2d93ffaa53247237dd75c
+    entity_id: 2142555853504c62857db4a723f232d5
+    domain: switch
+    trigger: device
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  conditions:
+  - condition: sun
+    after: sunset
+    before: sunrise
+  - condition: state
+    entity_id: input_boolean.movie_night
+    state:
+    - 'on'
+  actions:
+  - action: input_boolean.turn_off
+    metadata: {}
+    target:
+      entity_id: input_boolean.movie_night
+    data: {}
+  - action: light.turn_on
+    metadata: {}
+    target:
+      entity_id: light.living_room
+    data: {}
+  mode: single
+- id: '1770954468322'
+  alias: test cafe
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - button.synchronize_devices
+  actions:
+  - variables:
+      current_node: condition_1770954304277_1
+      flow_context: {}
+  - alias: State Machine Loop
+    repeat:
+      until: '{{ current_node == "END" }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ current_node == "condition_1770954304277_1" }}'
+          sequence:
+          - variables:
+              current_node: '{% if is_state(''conversation.home_assistant'', ''on'')
+                %}action_1770954348422_5{% else %}action_1770954471561_8{% endif %}'
+        - conditions:
+          - condition: template
+            value_template: '{{ current_node == "action_1770954348422_5" }}'
+          sequence:
+          - action: light.turn_on
+          - variables:
+              current_node: action_1770954484384_9
+        - conditions:
+          - condition: template
+            value_template: '{{ current_node == "action_1770954471561_8" }}'
+          sequence:
+          - action: light.turn_on
+          - variables:
+              current_node: action_1770954484384_9
+        - conditions:
+          - condition: template
+            value_template: '{{ current_node == "action_1770954484384_9" }}'
+          sequence:
+          - action: light.turn_on
+          - variables:
+              current_node: END
+        default:
+        - data:
+            message: 'C.A.F.E.: Unknown state "{{ current_node }}", ending flow'
+            level: warning
+          action: system_log.write
+        - variables:
+            current_node: END
+  mode: single
+  variables:
+    _cafe_metadata:
+      version: 1
+      strategy: native
+      nodes:
+        trigger_1770954299619_0:
+          x: -30
+          y: -150
+        condition_1770954304277_1:
+          x: 240
+          y: -150
+        action_1770954348422_5:
+          x: 555
+          y: -240
+        action_1770954471561_8:
+          x: 570
+          y: -45
+        action_1770954484384_9:
+          x: 885
+          y: -100
+      graph_id: bd0ea486-1b44-4f0a-8fdc-1d496a07da1a
+      graph_version: 1
+- id: '1781367924165'
+  alias: API test automation
+  description: Created by API test
+  triggers: []
+  conditions: []
+  actions: []
+  mode: single
+- id: '1781368062938'
+  alias: Thermostat by presence
+  description: Turn the thermostat on when the house looks occupied using people,
+    occupancy sensors, camera person detections, media playback, lights, and door/window
+    contact hints; turn it off only after the house has stayed quiet for 15 minutes.
+  triggers:
+  - trigger: state
+    entity_id:
+    - person.juan_ignacio_donoso
+    - person.maria_paz
+    - person.pili
+    - binary_sensor.home_occupancy
+    - binary_sensor.upstairs_occupancy
+    - binary_sensor.home_motion
+    - binary_sensor.upstairs_motion
+    - binary_sensor.family_room_person
+    - binary_sensor.entrance_person
+    - binary_sensor.entrance_person_2
+    - binary_sensor.service_yard_person
+    - binary_sensor.backyard_person
+    - media_player.android_tv_192_168_20_164
+    - media_player.marantz_nr1607
+    - media_player.marantz_nr1607_2
+    - media_player.black_macbook_airplay
+    - media_player.family_room_speaker_2
+    - media_player.living_room_speaker
+    - media_player.kitchen_speaker_2
+    - light.living_room
+    - light.family_room_light
+    - light.hallway_light
+    - light.living_room_main_tv
+    - light.dual_nano_switch
+    - light.dual_nano_switch_2
+    - binary_sensor.living_window_contact
+    - binary_sensor.kitchen_back_door_contact
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - variables:
+      person_home: '{{ is_state(''person.juan_ignacio_donoso'', ''home'') or is_state(''person.maria_paz'',
+        ''home'') or is_state(''person.pili'', ''home'') }}'
+      occupancy_active: '{{ is_state(''binary_sensor.home_occupancy'', ''on'') or
+        is_state(''binary_sensor.upstairs_occupancy'', ''on'') or is_state(''binary_sensor.home_motion'',
+        ''on'') or is_state(''binary_sensor.upstairs_motion'', ''on'') }}'
+      camera_person_active: '{{ is_state(''binary_sensor.family_room_person'', ''on'')
+        or is_state(''binary_sensor.entrance_person'', ''on'') or is_state(''binary_sensor.entrance_person_2'',
+        ''on'') or is_state(''binary_sensor.service_yard_person'', ''on'') or is_state(''binary_sensor.backyard_person'',
+        ''on'') }}'
+      media_active: '{{ is_state(''media_player.android_tv_192_168_20_164'', ''playing'')
+        or is_state(''media_player.marantz_nr1607'', ''on'') or is_state(''media_player.marantz_nr1607_2'',
+        ''on'') or is_state(''media_player.black_macbook_airplay'', ''playing'') or
+        is_state(''media_player.family_room_speaker_2'', ''playing'') or is_state(''media_player.living_room_speaker'',
+        ''playing'') or is_state(''media_player.kitchen_speaker_2'', ''playing'')
+        }}'
+      lights_active: '{{ is_state(''light.living_room'', ''on'') or is_state(''light.family_room_light'',
+        ''on'') or is_state(''light.hallway_light'', ''on'') or is_state(''light.living_room_main_tv'',
+        ''on'') or is_state(''light.dual_nano_switch'', ''on'') or is_state(''light.dual_nano_switch_2'',
+        ''on'') }}'
+      window_open: '{{ is_state(''binary_sensor.living_window_contact'', ''on'') or
+        is_state(''binary_sensor.kitchen_back_door_contact'', ''on'') }}'
+      house_occupied: '{{ (is_state(''person.juan_ignacio_donoso'', ''home'') or is_state(''person.maria_paz'',
+        ''home'') or is_state(''person.pili'', ''home'')) or (is_state(''binary_sensor.home_occupancy'',
+        ''on'') or is_state(''binary_sensor.upstairs_occupancy'', ''on'') or is_state(''binary_sensor.home_motion'',
+        ''on'') or is_state(''binary_sensor.upstairs_motion'', ''on'')) or (is_state(''binary_sensor.family_room_person'',
+        ''on'') or is_state(''binary_sensor.entrance_person'', ''on'') or is_state(''binary_sensor.entrance_person_2'',
+        ''on'') or is_state(''binary_sensor.service_yard_person'', ''on'') or is_state(''binary_sensor.backyard_person'',
+        ''on'')) or (is_state(''media_player.android_tv_192_168_20_164'', ''playing'')
+        or is_state(''media_player.marantz_nr1607'', ''on'') or is_state(''media_player.marantz_nr1607_2'',
+        ''on'') or is_state(''media_player.black_macbook_airplay'', ''playing'') or
+        is_state(''media_player.family_room_speaker_2'', ''playing'') or is_state(''media_player.living_room_speaker'',
+        ''playing'') or is_state(''media_player.kitchen_speaker_2'', ''playing''))
+        or ((is_state(''light.living_room'', ''on'') or is_state(''light.family_room_light'',
+        ''on'') or is_state(''light.hallway_light'', ''on'') or is_state(''light.living_room_main_tv'',
+        ''on'') or is_state(''light.dual_nano_switch'', ''on'') or is_state(''light.dual_nano_switch_2'',
+        ''on'')) and (is_state(''binary_sensor.home_occupancy'', ''on'') or is_state(''binary_sensor.upstairs_occupancy'',
+        ''on'') or is_state(''binary_sensor.home_motion'', ''on'') or is_state(''binary_sensor.upstairs_motion'',
+        ''on'') or is_state(''binary_sensor.family_room_person'', ''on'') or is_state(''binary_sensor.entrance_person'',
+        ''on'') or is_state(''binary_sensor.entrance_person_2'', ''on'') or is_state(''binary_sensor.service_yard_person'',
+        ''on'') or is_state(''binary_sensor.backyard_person'', ''on'') or is_state(''media_player.android_tv_192_168_20_164'',
+        ''playing'') or is_state(''media_player.marantz_nr1607'', ''on'') or is_state(''media_player.marantz_nr1607_2'',
+        ''on'') or is_state(''media_player.black_macbook_airplay'', ''playing'') or
+        is_state(''media_player.family_room_speaker_2'', ''playing'') or is_state(''media_player.living_room_speaker'',
+        ''playing'') or is_state(''media_player.kitchen_speaker_2'', ''playing'')))
+        or ((is_state(''binary_sensor.living_window_contact'', ''on'') or is_state(''binary_sensor.kitchen_back_door_contact'',
+        ''on'')) and (is_state(''binary_sensor.home_occupancy'', ''on'') or is_state(''binary_sensor.upstairs_occupancy'',
+        ''on'') or is_state(''binary_sensor.home_motion'', ''on'') or is_state(''binary_sensor.upstairs_motion'',
+        ''on'') or is_state(''binary_sensor.family_room_person'', ''on'') or is_state(''binary_sensor.entrance_person'',
+        ''on'') or is_state(''binary_sensor.entrance_person_2'', ''on'') or is_state(''binary_sensor.service_yard_person'',
+        ''on'') or is_state(''binary_sensor.backyard_person'', ''on'') or is_state(''media_player.android_tv_192_168_20_164'',
+        ''playing'') or is_state(''media_player.marantz_nr1607'', ''on'') or is_state(''media_player.marantz_nr1607_2'',
+        ''on'') or is_state(''media_player.black_macbook_airplay'', ''playing'') or
+        is_state(''media_player.family_room_speaker_2'', ''playing'') or is_state(''media_player.living_room_speaker'',
+        ''playing'') or is_state(''media_player.kitchen_speaker_2'', ''playing'')
+        or is_state(''light.living_room'', ''on'') or is_state(''light.family_room_light'',
+        ''on'') or is_state(''light.hallway_light'', ''on'') or is_state(''light.living_room_main_tv'',
+        ''on'') or is_state(''light.dual_nano_switch'', ''on'') or is_state(''light.dual_nano_switch_2'',
+        ''on''))) }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ house_occupied }}'
+      - condition: template
+        value_template: '{{ not is_state(''climate.home'', ''heat'') }}'
+      sequence:
+      - action: climate.set_hvac_mode
+        target:
+          entity_id: climate.home
+        data:
+          hvac_mode: heat
+      - action: notify.mobile_app_black_s22
+        data:
+          title: Thermostat by presence
+          message: Thermostat set to heat because the house looks occupied.
+    default:
+    - delay: 00:15:00
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: '{{ not ((is_state(''person.juan_ignacio_donoso'', ''home'')
+            or is_state(''person.maria_paz'', ''home'') or is_state(''person.pili'',
+            ''home'')) or (is_state(''binary_sensor.home_occupancy'', ''on'') or is_state(''binary_sensor.upstairs_occupancy'',
+            ''on'') or is_state(''binary_sensor.home_motion'', ''on'') or is_state(''binary_sensor.upstairs_motion'',
+            ''on'')) or (is_state(''binary_sensor.family_room_person'', ''on'') or
+            is_state(''binary_sensor.entrance_person'', ''on'') or is_state(''binary_sensor.entrance_person_2'',
+            ''on'') or is_state(''binary_sensor.service_yard_person'', ''on'') or
+            is_state(''binary_sensor.backyard_person'', ''on'')) or (is_state(''media_player.android_tv_192_168_20_164'',
+            ''playing'') or is_state(''media_player.marantz_nr1607'', ''on'') or is_state(''media_player.marantz_nr1607_2'',
+            ''on'') or is_state(''media_player.black_macbook_airplay'', ''playing'')
+            or is_state(''media_player.family_room_speaker_2'', ''playing'') or is_state(''media_player.living_room_speaker'',
+            ''playing'') or is_state(''media_player.kitchen_speaker_2'', ''playing''))
+            or ((is_state(''light.living_room'', ''on'') or is_state(''light.family_room_light'',
+            ''on'') or is_state(''light.hallway_light'', ''on'') or is_state(''light.living_room_main_tv'',
+            ''on'') or is_state(''light.dual_nano_switch'', ''on'') or is_state(''light.dual_nano_switch_2'',
+            ''on'')) and (is_state(''binary_sensor.home_occupancy'', ''on'') or is_state(''binary_sensor.upstairs_occupancy'',
+            ''on'') or is_state(''binary_sensor.home_motion'', ''on'') or is_state(''binary_sensor.upstairs_motion'',
+            ''on'') or is_state(''binary_sensor.family_room_person'', ''on'') or is_state(''binary_sensor.entrance_person'',
+            ''on'') or is_state(''binary_sensor.entrance_person_2'', ''on'') or is_state(''binary_sensor.service_yard_person'',
+            ''on'') or is_state(''binary_sensor.backyard_person'', ''on'') or is_state(''media_player.android_tv_192_168_20_164'',
+            ''playing'') or is_state(''media_player.marantz_nr1607'', ''on'') or is_state(''media_player.marantz_nr1607_2'',
+            ''on'') or is_state(''media_player.black_macbook_airplay'', ''playing'')
+            or is_state(''media_player.family_room_speaker_2'', ''playing'') or is_state(''media_player.living_room_speaker'',
+            ''playing'') or is_state(''media_player.kitchen_speaker_2'', ''playing'')))
+            or ((is_state(''binary_sensor.living_window_contact'', ''on'') or is_state(''binary_sensor.kitchen_back_door_contact'',
+            ''on'')) and (is_state(''binary_sensor.home_occupancy'', ''on'') or is_state(''binary_sensor.upstairs_occupancy'',
+            ''on'') or is_state(''binary_sensor.home_motion'', ''on'') or is_state(''binary_sensor.upstairs_motion'',
+            ''on'') or is_state(''binary_sensor.family_room_person'', ''on'') or is_state(''binary_sensor.entrance_person'',
+            ''on'') or is_state(''binary_sensor.entrance_person_2'', ''on'') or is_state(''binary_sensor.service_yard_person'',
+            ''on'') or is_state(''binary_sensor.backyard_person'', ''on'') or is_state(''media_player.android_tv_192_168_20_164'',
+            ''playing'') or is_state(''media_player.marantz_nr1607'', ''on'') or is_state(''media_player.marantz_nr1607_2'',
+            ''on'') or is_state(''media_player.black_macbook_airplay'', ''playing'')
+            or is_state(''media_player.family_room_speaker_2'', ''playing'') or is_state(''media_player.living_room_speaker'',
+            ''playing'') or is_state(''media_player.kitchen_speaker_2'', ''playing'')
+            or is_state(''light.living_room'', ''on'') or is_state(''light.family_room_light'',
+            ''on'') or is_state(''light.hallway_light'', ''on'') or is_state(''light.living_room_main_tv'',
+            ''on'') or is_state(''light.dual_nano_switch'', ''on'') or is_state(''light.dual_nano_switch_2'',
+            ''on'')))) }}'
+        - condition: template
+          value_template: '{{ not is_state(''climate.home'', ''off'') }}'
+        sequence:
+        - action: climate.turn_off
+          target:
+            entity_id: climate.home
+        - action: notify.mobile_app_black_s22
+          data:
+            title: Thermostat by presence
+            message: Thermostat turned off after 15 minutes with no occupancy signals.
+      default: []
+  mode: restart
+- id: '1788019998963'
+  alias: Ruby poop show notification Living Display
+  description: Mirrors sensor.ruby_poop_status onto the Pixel Display, using indicator
+    2 so it reads distinctly from the food reminder on indicator 1. Pending duty is
+    a pushed app; completion is a one-shot notification. The right button on the device
+    clears it - see the 'Ruby Poop Duty Done' automation. Resyncs on HA start.
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.ruby_poop_status
+    id: changed
+  - trigger: homeassistant
+    event: start
+    id: sync
+  conditions:
+  - condition: or
+    conditions:
+    - condition: trigger
+      id: sync
+    - condition: template
+      value_template: '{{ trigger.from_state.state != trigger.to_state.state }}'
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.ruby_poop_status
+        state: Yard is clean
+      sequence:
+      - if:
+        - condition: trigger
+          id: changed
+        then:
+        - action: mqtt.publish
+          data:
+            evaluate_payload: false
+            qos: 0
+            retain: false
+            topic: awtrixLiving/cmd/notify
+            payload: '{"text": "Thanks {{ states(''sensor.ruby_poop_turn'') }}! Yard
+              is clean", "icon": "poop", "durationMs": 15000, "stack": false, "textColor":
+              "palette", "palette": "Rainbow"}'
+      - action: mqtt.publish
+        data:
+          evaluate_payload: false
+          qos: 0
+          retain: false
+          topic: awtrixLiving/cmd/apps/pushed/rubypoop
+          payload: ''
+      - action: mqtt.publish
+        data:
+          evaluate_payload: false
+          qos: 0
+          retain: false
+          topic: awtrixLiving/cmd/indicators/2
+          payload: ''
+    default:
+    - action: mqtt.publish
+      data:
+        evaluate_payload: false
+        qos: 0
+        retain: false
+        topic: awtrixLiving/cmd/apps/pushed/rubypoop
+        payload: '{"text": "{{ states(''sensor.ruby_poop_status'') }}", "icon": "poop",
+          "durationMs": 10000, "textColor": "{% if ''overdue'' in states(''sensor.ruby_poop_status'')
+          %}#FF3333{% else %}#E8A33D{% endif %}"}'
+    - action: mqtt.publish
+      data:
+        evaluate_payload: false
+        qos: 0
+        retain: false
+        topic: awtrixLiving/cmd/indicators/2
+        payload: '{% if ''overdue'' in states(''sensor.ruby_poop_status'') %}{"color":
+          "#FF3333", "blinkMs": 500}{% else %}{"color": "#E8A33D", "blinkMs": 0}{%
+          endif %}'
+  mode: restart
+- id: '1788021000646'
+  alias: Rotate Ruby Care Turn
+  description: 'Advances input_select.ruby_care_turn at each half-month boundary:
+    days 1-15 are one kid, day 16 to month end the next. The marker input_text records
+    which period has already been rotated for, so a restart, a config reload, or several
+    triggers in the same period cannot double-advance the turn. On the very first
+    run the marker is empty, so it only seeds the marker and leaves the current turn
+    alone.'
+  triggers:
+  - trigger: time
+    at: 00:00:30
+  - trigger: homeassistant
+    event: start
+  conditions:
+  - condition: template
+    value_template: '{{ states(''sensor.ruby_care_period'') not in [''unknown'', ''unavailable'']
+      and states(''sensor.ruby_care_period'') != states(''input_text.ruby_last_rotated_period'')
+      }}'
+  actions:
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: input_text.ruby_last_rotated_period
+        state:
+        - ''
+        - unknown
+        - unavailable
+    then:
+    - action: input_select.select_next
+      target:
+        entity_id: input_select.ruby_care_turn
+      data:
+        cycle: true
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.ruby_last_rotated_period
+    data:
+      value: '{{ states(''sensor.ruby_care_period'') }}'
+  mode: single
+- id: '1788021043773'
+  alias: Update Ruby Last Fed Time
+  description: Stamps the feeding time when the food container lid opens. The care
+    turn is NOT advanced here - it rotates on a half-month schedule instead, see 'Rotate
+    Ruby Care Turn'.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.ruby_food_lid
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.ruby_last_fed
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  mode: single
+- id: '1788022361908'
+  alias: Ruby Acknowledge Chore From Display
+  description: 'The centre (select) button on the Pixel Display marks the chore currently
+    on screen as done: on the food app it stamps last-fed, on the poop app it stamps
+    last-pickup. It acts only while one of those two apps is the app on screen, so
+    the button keeps its normal behaviour the rest of the time. For feeding this is
+    a fallback - the food container lid sensor does not always fire - so the same
+    helper can be written by either path.'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.living_room_pixel_display_button_select
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_pixel_display_current_app
+        state: rubyfood
+      sequence:
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.ruby_last_fed
+        data:
+          datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+    - conditions:
+      - condition: state
+        entity_id: sensor.living_room_pixel_display_current_app
+        state: rubypoop
+      sequence:
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.ruby_last_poop_pickup
+        data:
+          datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+  mode: single
+- id: '1788024475270'
+  alias: Ruby Voice Reminder On Face Match
+  description: 'When the living room camera recognises the kid whose care turn it
+    currently is, and a chore is actually outstanding, speak a personalised reminder
+    on the living room speaker and force the matching app onto the Pixel Display.
+
+
+    Triggers on the last_seen ATTRIBUTE, not the state: the face sensor is sticky
+    and holds the last recognised name, so the same person walking past twice produces
+    no state change at all.
+
+
+    Two independent limits, because they do different jobs. The counter caps announcements
+    at two per feeding period (refilled 06:00 and 13:00 by ''Reset Ruby Voice Announcement
+    Quota''). The 30 minute timer spaces them out - without it both allowed announcements
+    would fire within seconds of each other, since the face sensor flaps between names
+    every few hundred ms whenever several people are in frame, and the whole quota
+    would be spent on one gathering.
+
+
+    Speaks on media_player.living_room_voice_2 (Google Home Mini), NOT living_room_speaker.
+    The latter is a Chromecast Audio with no speaker of its own: it accepts the stream
+    and reports playing even when the Marantz it feeds is powered off, which is silent
+    failure with no error anywhere. The Mini is self-powered and always awake.
+
+
+    Speaks via ElevenLabs. Note the shape: tts.speak TARGETS the tts entity and takes
+    the speaker as media_player_entity_id in data, unlike the legacy *_say services
+    which target the speaker directly. Voice and model come from the integration''s
+    own options, so changing the household voice in the UI changes this announcement
+    too. To give Ruby reminders their own voice without affecting anything else, add
+    an options.voice key with a voice id to this action.
+
+
+    The voice is chosen per kid via the voice_id variable, overriding the integration
+    default for this announcement only. Names not in that map fall back to the household
+    default voice rather than erroring, so an unmapped or renamed rota entry still
+    speaks.
+
+
+    PER-KID VOICE MAP IS EMPTY ON PURPOSE. ElevenLabs rejects LIBRARY voices on a
+    free plan with HTTP 402 paid_plan_required, and the failure is silent from Home
+    Assistant''s side: the service call returns success and only the log shows the
+    error. Only premade voices work on the free tier. Do not add a voice id to this
+    map without first confirming it actually produces audio.
+
+
+    spoken_name exists so the accented form reaches the speech engine WITHOUT changing
+    the rota value. The input_select option must stay ''Ines'' unaccented because
+    that is the string the face recogniser emits, and the trigger compares the two
+    directly - accenting the helper would silently stop the automation ever matching
+    her.'
+  triggers:
+  - trigger: state
+    entity_id: sensor.frigate_face_recognition_living_room_last_recognized_face
+    attribute: last_seen
+  conditions:
+  - condition: numeric_state
+    entity_id: counter.ruby_voice_announcements_this_period
+    below: 2
+  - condition: state
+    entity_id: timer.ruby_voice_reminder_cooldown
+    state: idle
+  - condition: time
+    after: 07:00:00
+    before: '21:00:00'
+  - condition: template
+    value_template: '{{ states(''sensor.frigate_face_recognition_living_room_last_recognized_face'')
+      == states(''input_select.ruby_care_turn'') }}'
+  - condition: or
+    conditions:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: sensor.ruby_feeding_status
+        state: Ruby was fed
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: sensor.ruby_poop_status
+        state: Yard is clean
+  actions:
+  - action: counter.increment
+    target:
+      entity_id: counter.ruby_voice_announcements_this_period
+  - action: timer.start
+    target:
+      entity_id: timer.ruby_voice_reminder_cooldown
+  - action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: awtrixLiving/cmd/apps/switch
+      payload: '{"name": "{{ ''rubyfood'' if food_pending else ''rubypoop'' }}", "fast":
+        true}'
+  - action: tts.speak
+    target:
+      entity_id: tts.elevenlabs_text_to_speech
+    data:
+      media_player_entity_id: media_player.living_room_voice_2
+      message: '{% if food_pending and poop_pending %}{{ spoken_name }}! It is your
+        turn with Ruby. She still needs feeding, and the backyard needs picking up.{%
+        elif food_pending %}{{ spoken_name }}! It is your turn. Ruby has not been
+        fed yet.{% else %}{{ spoken_name }}! It is your turn. The backyard still needs
+        picking up.{% endif %}'
+      options:
+        voice: '{{ voice_id }}'
+  mode: single
+  variables:
+    who: '{{ states(''input_select.ruby_care_turn'') }}'
+    food_pending: '{{ states(''sensor.ruby_feeding_status'') != ''Ruby was fed'' }}'
+    poop_pending: '{{ states(''sensor.ruby_poop_status'') != ''Yard is clean'' }}'
+    voice_id: '{% set w = states(''input_select.ruby_care_turn'') %}{% set voices
+      = {''Ines'': ''cgSgspJ2msm6clMCkdW9'', ''Pili'': ''pFZP5JQG7iQjIQuC4Bku'', ''Lucas'':
+      ''TX3LPaxmHKxFdv7VOQHJ''} %}{{ voices.get(w, ''EXAVITQu4vr4xnSDxMaL'') }}'
+    spoken_name: '{% set w = states(''input_select.ruby_care_turn'') %}{% set names
+      = {''Ines'': ''Inés''} %}{{ names.get(w, w) }}'
+- id: '1788024600966'
+  alias: Reset Ruby Voice Announcement Quota
+  description: 'Refills the spoken-reminder quota at the start of each feeding period
+    - 06:00 for the morning, 13:00 for the evening - so at most two announcements
+    happen per half-day. Deliberately has no Home Assistant start trigger: a restart
+    must not refill the quota, because the failure mode of a missed reset is under-announcing,
+    which is harmless, while over-announcing is not.'
+  triggers:
+  - trigger: time
+    at: 06:00:00
+  - trigger: time
+    at: '13:00:00'
+  conditions: []
+  actions:
+  - action: counter.reset
+    target:
+      entity_id: counter.ruby_voice_announcements_this_period
+  mode: single

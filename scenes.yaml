@@ -1,0 +1,245 @@
+- id: '1732615878345'
+  name: Morning
+  entities:
+    media_player.master_bathroom:
+      volume_level: 0.4439266622066498
+      is_volume_muted: false
+      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
+      media_content_type: music
+      media_duration: 267
+      media_position: 248.855
+      media_position_updated_at: '2024-11-26T10:11:04.491203+00:00'
+      media_title: Chasing Cars
+      media_artist: Snow Patrol
+      media_album_name: Eyes Open
+      app_id: 705D30C6
+      app_name: Spotify
+      entity_picture_local: /api/media_player_proxy/media_player.master_bathroom?token=c2f3c24747d03845809d2537c91a08268ef1a0cf30586ff43610f771962ba6a4&cache=16ec4b8792e85e5c
+      device_class: speaker
+      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
+      friendly_name: Master Bathroom
+      supported_features: 152511
+      state: playing
+    media_player.kids_bathroom:
+      volume_level: 0.11979826539754868
+      is_volume_muted: false
+      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
+      media_content_type: music
+      media_duration: 267
+      media_position: 248.855
+      media_position_updated_at: '2024-11-26T10:11:04.491295+00:00'
+      media_title: Chasing Cars
+      media_artist: Snow Patrol
+      media_album_name: Eyes Open
+      app_id: 705D30C6
+      app_name: Spotify
+      entity_picture_local: /api/media_player_proxy/media_player.kids_bathroom?token=4427d641dc840cbf17a9bd310e9e9d2a4011d1f36ba2dad23da329a39b162784&cache=16ec4b8792e85e5c
+      device_class: speaker
+      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
+      friendly_name: Kids Bathroom
+      supported_features: 152511
+      state: playing
+    media_player.kitchen_speaker:
+      volume_level: 0.2523389756679535
+      is_volume_muted: false
+      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
+      media_content_type: music
+      media_duration: 267
+      media_position: 248.855
+      media_position_updated_at: '2024-11-26T10:11:04.491240+00:00'
+      media_title: Chasing Cars
+      media_artist: Snow Patrol
+      media_album_name: Eyes Open
+      app_id: 705D30C6
+      app_name: Spotify
+      entity_picture_local: /api/media_player_proxy/media_player.kitchen_speaker?token=6fac4678e5626f2cab1d48ceeb09db5f7fdab5d60fe4b330b480c1c594ffc2cc&cache=16ec4b8792e85e5c
+      device_class: speaker
+      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
+      friendly_name: Kitchen speaker
+      supported_features: 152511
+      state: playing
+    media_player.office:
+      volume_level: 0.0747094601392746
+      is_volume_muted: false
+      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
+      media_content_type: music
+      media_duration: 267
+      media_position: 248.855
+      media_position_updated_at: '2024-11-26T10:11:04.491265+00:00'
+      media_title: Chasing Cars
+      media_artist: Snow Patrol
+      media_album_name: Eyes Open
+      app_id: 705D30C6
+      app_name: Spotify
+      entity_picture_local: /api/media_player_proxy/media_player.office?token=2614b43ea494035d0ab4d3a6add20bb96c6dd76eb0aa49c84cc51d256081ff92&cache=16ec4b8792e85e5c
+      device_class: speaker
+      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
+      friendly_name: Office
+      supported_features: 152511
+      state: playing
+    media_player.family_room:
+      volume_level: 0.22768521308898926
+      is_volume_muted: false
+      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
+      media_content_type: music
+      media_duration: 267
+      media_position: 248.855
+      media_position_updated_at: '2024-11-26T10:11:04.491066+00:00'
+      media_title: Chasing Cars
+      media_artist: Snow Patrol
+      media_album_name: Eyes Open
+      app_id: 531A4F84
+      app_name: Spotify
+      entity_picture_local: /api/media_player_proxy/media_player.family_room?token=745cdb843cbd18004fe5fbf5b710313f2e07766674a55a59ff47f03a83bf5d53&cache=16ec4b8792e85e5c
+      device_class: speaker
+      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
+      friendly_name: Family Room
+      supported_features: 152511
+      state: playing
+  metadata: {}
+- id: '1733793180450'
+  name: Movie Night
+  entities:
+    light.living_room_main_tv:
+      supported_color_modes:
+      - onoff
+      color_mode:
+      friendly_name: Living Tv
+      supported_features: 0
+      state: 'off'
+    light.bias:
+      min_color_temp_kelvin: 2500
+      max_color_temp_kelvin: 9000
+      min_mireds: 111
+      max_mireds: 400
+      effect_list:
+      - effect_colorloop
+      - effect_pulse
+      - effect_move
+      - effect_stop
+      supported_color_modes:
+      - color_temp
+      - hs
+      effect: effect_move
+      color_mode: color_temp
+      brightness: 48
+      color_temp_kelvin: 2500
+      color_temp: 400
+      hs_color:
+      - 28.874
+      - 72.522
+      rgb_color:
+      - 255
+      - 159
+      - 70
+      xy_color:
+      - 0.546
+      - 0.389
+      friendly_name: Bias
+      supported_features: 36
+      state: 'on'
+  icon: mdi:movie
+  metadata: {}
+- id: '1734433189306'
+  name: New scene
+  entities:
+    light.dual_nano_switch:
+      supported_color_modes:
+      - onoff
+      color_mode:
+      friendly_name: Hall
+      supported_features: 0
+      state: 'off'
+  metadata:
+    light.dual_nano_switch:
+      entity_only: true
+- id: '1767143299936'
+  name: Quincho Fan
+  entities:
+    fan.quincho_fan:
+      preset_modes:
+      - nature
+      - normal
+      - sleep
+      - fresh
+      friendly_name: Quincho Fan
+      supported_features: 61
+      direction: forward
+      percentage: 1
+      percentage_step: 1
+      preset_mode: normal
+      state: 'on'
+  icon: mdi:ceiling-fan
+  metadata: {}
+- id: '1767143308869'
+  name: Quincho Fan
+  entities:
+    fan.quincho_fan:
+      preset_modes:
+      - nature
+      - normal
+      - sleep
+      - fresh
+      friendly_name: Quincho Fan
+      supported_features: 61
+      direction: forward
+      percentage: 1
+      percentage_step: 1
+      preset_mode: nature
+      state: 'on'
+  icon: mdi:ceiling-fan
+  metadata: {}
+- id: '1770941808060'
+  name: Movie Night Paused
+  entities:
+    light.living_room:
+      supported_color_modes:
+      - onoff
+      color_mode: onoff
+      entity_id:
+      - light.living_room_main_tv
+      - light.living_room_main_hall
+      icon: mdi:lightbulb-group
+      friendly_name: Living Room
+      supported_features: 0
+      state: 'on'
+    light.bias:
+      min_color_temp_kelvin: 2500
+      max_color_temp_kelvin: 9000
+      min_mireds: 111
+      max_mireds: 400
+      effect_list:
+      - effect_colorloop
+      - effect_pulse
+      - effect_move
+      - effect_stop
+      supported_color_modes:
+      - color_temp
+      - hs
+      effect:
+      color_mode: hs
+      brightness: 161
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 352.117
+      - 38.824
+      rgb_color:
+      - 255
+      - 156
+      - 169
+      xy_color:
+      - 0.453
+      - 0.305
+      friendly_name: Bias
+      supported_features: 36
+      state: 'on'
+  metadata:
+    light.living_room:
+      entity_only: true
+    light.bias:
+      entity_only: true
+  icon: mdi:movie-filter
+- id: '1770942299936'
+  name: New scene
+  entities: {}

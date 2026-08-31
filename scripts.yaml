@@ -1,0 +1,11 @@
+find_remote:
+  sequence:
+  - action: androidtv.adb_command
+    metadata: {}
+    target:
+      device_id: 3f05eb43811d8be57abb0fb9d9081c2f
+    data:
+      command: am start -a android.intent.action.VIEW -d -n com.nvidia.remotelocator/.ShieldRemoteLocatorActivity
+  alias: Find Remote
+  description: Script to trigger the location beep on the Nvidia Shield remote
+  icon: mdi:remote-tv
