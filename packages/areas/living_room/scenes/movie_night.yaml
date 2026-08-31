@@ -1,0 +1,59 @@
+name: Movie night
+id: movie_night
+entities:
+  light.living_room_main_hall:
+    supported_color_modes:
+      - onoff
+    color_mode: null
+    friendly_name: Living Pasillo
+    supported_features: 0
+    state: "off"
+  light.living_room_main_tv:
+    supported_color_modes:
+      - onoff
+    color_mode: null
+    friendly_name: Living Tv
+    supported_features: 0
+    state: "off"
+  light.bias:
+    min_color_temp_kelvin: 2500
+    max_color_temp_kelvin: 9000
+    min_mireds: 111
+    max_mireds: 400
+    effect_list:
+      - effect_colorloop
+      - effect_pulse
+      - effect_move
+      - effect_stop
+    supported_color_modes:
+      - color_temp
+      - hs
+    effect: null
+    color_mode: color_temp
+    brightness: 79
+    color_temp_kelvin: 3205
+    color_temp: 312
+    hs_color:
+      - 27.518
+      - 51.595
+    rgb_color:
+      - 255
+      - 184
+      - 123
+    xy_color:
+      - 0.477
+      - 0.38
+    friendly_name: Bias
+    supported_features: 36
+    state: "on"
+  light.dual_nano_switch:
+    supported_color_modes:
+      - onoff
+    color_mode: null
+    friendly_name: Hall
+    supported_features: 0
+    state: "off"
+icon: mdi:television-classic
+metadata:
+  light.dual_nano_switch:
+    entity_only: true

@@ -3,21 +3,15 @@ input_datetime:
     name: Ruby Last Fed
     has_date: true
     has_time: true
+  ruby_last_poop_pickup:
+    name: Ruby Last Poop Pickup
+    has_date: true
+    has_time: true
 
-automation:
-  - alias: 'Update Ruby Last Fed Time'
-    id: 20d22041-9c0e-41a0-85b0-7943da02d6a6
-    trigger:
-      - platform: state
-        entity_id: binary_sensor.ruby_food_lid
-        from: 'off'
-        to: 'on'
-    action:
-      - service: input_datetime.set_datetime
-        target:
-          entity_id: input_datetime.ruby_last_fed
-        data:
-          datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+input_text:
+  ruby_last_rotated_period:
+    name: Ruby Care Turn Period Marker
+    max: 32
 
 sensor:
   - platform: time_date
@@ -29,46 +23,95 @@ template:
       - name: "Ruby Feeding Status"
         unique_id: 0d8bc46d-804e-4fe2-a78c-44263e261db9
         state: >
-          {% set time = states('sensor.time') %}
           {% set now = now() %}
           {% set tz = now.tzinfo %}
           {% set last_fed_str = states('input_datetime.ruby_last_fed') %}
-          {% if last_fed_str %}
+          {% if last_fed_str not in ['unknown', 'unavailable', 'none', ''] %}
             {% set last_fed = strptime(last_fed_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=tz) %}
           {% else %}
             {% set last_fed = None %}
           {% endif %}
-          {% set morning_start = now.replace(hour=7, minute=0, second=0, microsecond=0) %}
-          {% set morning_end = now.replace(hour=11, minute=0, second=0, microsecond=0) %}
-          {% set evening_start = now.replace(hour=18, minute=0, second=0, microsecond=0) %}
-          {% set evening_end = now.replace(hour=21, minute=0, second=0, microsecond=0) %}
 
-          {% if morning_start <= now < morning_end %} {## Morning Window ##}
-            {% if last_fed and morning_start <= last_fed < morning_end %}
-              Ruby has been fed this morning.
+          {# Define Feeding Periods #}
+          {% set morning_period_start = now.replace(hour=6, minute=0, second=0, microsecond=0) %}
+          {% set morning_period_end = now.replace(hour=12, minute=59, second=59, microsecond=999999) %}
+          {% set evening_period_start = now.replace(hour=13, minute=0, second=0, microsecond=0) %}
+          {% set evening_period_end = (now + timedelta(days=1)).replace(hour=5, minute=59, second=59, microsecond=999999) %}
+
+          {# Define Preferred Feeding Windows #}
+          {% set morning_window_start = now.replace(hour=7, minute=0, second=0, microsecond=0) %}
+          {% set morning_window_end = now.replace(hour=10, minute=0, second=0, microsecond=0) %}
+          {% set evening_window_start = now.replace(hour=18, minute=0, second=0, microsecond=0) %}
+          {% set evening_window_end = now.replace(hour=21, minute=0, second=0, microsecond=0) %}
+
+          {# Determine Current Feeding Period and Window Status #}
+          {% if morning_period_start <= now <= morning_period_end %}
+            {% set current_period = 'morning' %}
+            {% set current_period_start = morning_period_start %}
+            {% set current_period_end = morning_period_end %}
+            {% set current_window_start = morning_window_start %}
+            {% set current_window_end = morning_window_end %}
+            {% set previous_period = 'evening' %}
+            {% set previous_period_start = evening_period_start - timedelta(days=1) %}
+            {% set previous_period_end = evening_period_end - timedelta(days=1) %}
+
+            {# Define Maximum Time Between Feedings (in hours) #}
+            {% set max_hours_between_feedings = 16 %}
+          {% else %}
+            {% set current_period = 'evening' %}
+            {% set current_period_start = evening_period_start %}
+            {% set current_period_end = evening_period_end %}
+            {% set current_window_start = evening_window_start %}
+            {% set current_window_end = evening_window_end %}
+            {% set previous_period = 'morning' %}
+            {% set previous_period_start = morning_period_start %}
+            {% set previous_period_end = morning_period_end %}
+
+            {# Define Maximum Time Between Feedings (in hours) #}
+            {% set max_hours_between_feedings = 12 %}
+          {% endif %}
+
+          {# Determine Window Status #}
+          {% if now < current_window_start %}
+            {% set window_status = 'before' %}
+          {% elif current_window_start <= now <= current_window_end %}
+            {% set window_status = 'during' %}
+          {% else %}
+            {% set window_status = 'after' %}
+          {% endif %}
+
+          {# Check Last Feeding Time #}
+          {% set fed_in_current_period = last_fed and current_period_start <= last_fed <= current_period_end %}
+          {% set fed_in_previous_period = last_fed and previous_period_start <= last_fed <= previous_period_end %}
+
+          {# Calculate Time Since Last Feeding #}
+          {% if last_fed %}
+            {% set hours_since_last_fed = (now - last_fed).total_seconds() / 3600 %}
+          {% else %}
+            {% set hours_since_last_fed = None %}
+          {% endif %}
+
+          {# Determine Dog's Status #}
+          {% if hours_since_last_fed is not none and hours_since_last_fed >= max_hours_between_feedings %}
+            Ruby is starving! {{ states('input_select.ruby_care_turn') }}, please feed her.
+          {% else %}
+            {% if fed_in_current_period %}
+              Ruby was fed
             {% else %}
-              It is time to feed Ruby.
-            {% endif %}
-          {% elif morning_end <= now < evening_start %} {## During the day ##}
-            {% if last_fed and morning_start <= last_fed < morning_end %}
-              Ruby has been fed this morning.
-            {% else %}
-              Ruby is starving! You forgot to feed Ruby this morning.
-            {% endif %}
-          {% elif evening_start <= now < evening_end %} {## Evening Window ##}
-            {% if last_fed and evening_start <= last_fed < evening_end %}
-              Ruby has been fed this evening.
-            {% else %}
-              It is time to feed Ruby.
-            {% endif %}
-          {% else %} {## During the night ##}
-            {% if last_fed and evening_start <= last_fed < evening_end %}
-              Ruby has been fed this evening.
-            {% elif last_fed and morning_start <= last_fed < morning_end %}
-              Ruby is starving! You forgot to feed Ruby this evening.
-            {% else %}
-              Ruby is starving! You forgot to feed Ruby today.
+              {% if window_status == 'before' %}
+                Ruby was fed
+              {% elif window_status == 'during' %}
+                {{ states('input_select.ruby_care_turn') }}, it is time to feed Ruby
+              {% elif window_status == 'after' %}
+                Ruby is starving! {{ states('input_select.ruby_care_turn') }}, please feed her
+              {% endif %}
             {% endif %}
           {% endif %}
-        attributes: 
-          ruby_last_fed: "{{ states('input_datetime.ruby_last_fed') | as_datetime | time_since }} ago"
+        attributes:
+          ruby_last_fed: >-
+            {% set last = states('input_datetime.ruby_last_fed') %}
+            {% if last in ['unknown', 'unavailable', 'none', ''] %}
+              never
+            {% else %}
+              {{ last | as_datetime | time_since }} ago
+            {% endif %}
