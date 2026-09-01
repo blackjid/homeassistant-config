@@ -1,7 +1,7 @@
 name: Movie night
 id: movie_night
 entities:
-  light.living_room_main_hall:
+  light.living_room_main_2:
     supported_color_modes:
       - onoff
     color_mode: null

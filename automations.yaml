@@ -23,25 +23,25 @@
   alias: 'Entrance: Turn off car lights after automation'
   description: Turn off garage lights after 5 minutes being on. Only if they were
     turned on by a service (automation)
-  trigger:
-  - platform: state
-    entity_id:
-    - light.garage_green_garden_sconces
+  triggers:
+  - entity_id:
+    - light.terrace_master_bedroom_terrace_controller_garage_green_garden_sconces
     from: 'off'
     to: 'on'
     for:
       hours: 0
       minutes: 5
       seconds: 0
-  condition:
+    trigger: state
+  conditions:
   - condition: template
-    value_template: '{{ states.light.garage_green_garden_sconces.context.parent_id
+    value_template: '{{ states.light.terrace_master_bedroom_terrace_controller_garage_green_garden_sconces.context.parent_id
       != None }}'
-  action:
-  - service: light.turn_off
-    data: {}
+  actions:
+  - data: {}
     target:
-      entity_id: light.garage_green_garden_sconces
+      entity_id: light.terrace_master_bedroom_terrace_controller_garage_green_garden_sconces
+    action: light.turn_off
   mode: single
 - id: '1700171683615'
   alias: Entrance - S22
@@ -200,9 +200,7 @@
   actions:
   - action: light.turn_off
     target:
-      entity_id:
-      - light.garage_green_garden_sconces
-      - light.entrance_porch
+      entity_id: light.terrace_master_bedroom_terrace_controller_garage_green_garden_sconces
     data: {}
   mode: single
 - id: '1742329310004'
