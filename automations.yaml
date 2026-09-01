@@ -1101,46 +1101,66 @@
   mode: single
 - id: '1788229870811'
   alias: UC Score on Living Display
-  description: 'Pushes a live score app onto the Pixel Display while Universidad Catolica
-    are playing, and removes it when the match ends.
+  description: 'Drives the ucscore app on the Pixel Display through the whole match
+    day: a fixture reminder before kick-off, the live score during the match, the
+    final result for 20 minutes afterwards, then nothing.
 
 
-    awtrix-ng contract, same as the Ruby apps: publishing JSON to cmd/apps/pushed/<name>
-    creates or updates the app, and publishing an EMPTY payload to the same topic
-    deletes it. The app occupies a slot in the display''s rotation for as long as
-    it exists, so the empty publish is what stops a finished match sticking on the
-    device - it keeps its app list in RAM only.
+    awtrix-ng contract, same as the Ruby apps: JSON to cmd/apps/pushed/<name> creates
+    or replaces the app, an EMPTY payload deletes it. The device keeps its app list
+    in RAM only, hence the homeassistant start trigger.
 
 
-    Catolica are always shown as UC, never the provider''s CDUC abbreviation. This
-    is applied by comparing each side against team_name rather than hardcoding a slot,
-    so it holds whether they are at home or away.
+    Catolica always render as UC - U in blue, C in red - with everything else white.
+    The two coloured letters are built as separate text fragments, which awtrix-ng
+    supports as an array of {text, color} objects. Whether UC appear on the left or
+    the right is decided from team_name, not hardcoded, so an away fixture reads OHI
+    2-3 UC with the colours still on the right letters.
 
 
-    No icon set on purpose: the awtrix-ng HTTP API on this device exposes no icon
-    listing, so rather than guess an id that renders blank, this is text-only. Numeric
-    LaMetric ids do work here (the Ruby food app uses 5242), so an icon can be added
-    later once one is uploaded.'
+    The 20 minute post-match window is owned by timer.uc_final_score_display, not
+    by a delay, so it survives a restart and can be cut short by the centre button
+    - see ''UC Score Dismiss From Display''. lifetimeMs on the payload is a second
+    line of defence: if Home Assistant never sends the delete, the device drops the
+    app on its own.
+
+
+    The fixture-reminder branch deliberately excludes statuses in and post, because
+    next_match keeps pointing at the match just played until the provider rolls it
+    forward - without that check a finished match would reappear as an upcoming one
+    for the rest of the day.'
   triggers:
   - trigger: state
     entity_id:
     - sensor.soccer_live_universidad_catolica_next_match
     - binary_sensor.soccer_live_universidad_catolica_match_live
+    - binary_sensor.soccer_live_universidad_catolica_match_today
     id: changed
-    note: No to/from filter, so attribute-only updates count too. The integration
-      polls every 60s while live and some of those polls move the clock attribute
-      without changing the state string, which would otherwise be dropped.
+    note: 'No to/from filter, so attribute-only updates count too: the integration
+      polls every 60s while live and some polls move the clock attribute without changing
+      the state string.'
   - trigger: time_pattern
     minutes: /1
     id: tick
-    note: Belt and braces refresh, matched to the integration's 60s live_scan_interval.
-      Gated by the condition below so it only publishes while a match is actually
-      live - otherwise this would push an empty payload every minute, all day.
+    note: Refresh matched to the integration's live_scan_interval of 60s, so a lost
+      publish self-heals within a minute. Gated by the condition below to fire only
+      during a live match.
+  - trigger: timer.started
+    target:
+      entity_id: timer.uc_final_score_display
+    id: window_opened
+    note: 'Without this the FT result would not appear until the next poll: ''UC Start
+      Final Score Window'' opens the window, but starting a timer is not otherwise
+      something this automation watches.'
+  - trigger: timer.finished
+    target:
+      entity_id: timer.uc_final_score_display
+    id: expired
+    note: End of the 20 minute post-match window - falls through to the default branch,
+      which removes the app.
   - trigger: homeassistant
     event: start
     id: sync
-    note: Resyncs after a restart so a stale score app cannot survive on the device,
-      which keeps its app list in RAM only.
   conditions:
   - condition: or
     conditions:
@@ -1151,11 +1171,9 @@
       conditions:
       - condition: trigger
         id: tick
-    note: Run whenever a match is live, and otherwise only for real events - never
-      for a minute tick. That lets a state change or a restart still clear a finished
-      match, without the tick spamming an empty publish once a minute forever. Replaces
-      an earlier trigger.from_state template guard, which both dropped attribute-only
-      updates and would have raised on the tick and start triggers.
+    note: Ticks only act during a live match; every other trigger always acts. Without
+      this the minute tick would re-publish once a minute all day, and during the
+      post-match window it would keep resetting lifetimeMs.
   actions:
   - choose:
     - conditions:
@@ -1169,8 +1187,50 @@
           qos: 0
           retain: false
           topic: awtrixLiving/cmd/apps/pushed/ucscore
-          payload: '{"text": "{{ text }}", "durationMs": 8000, "textColor": "{{ color
-            }}"}'
+          payload: '{{ {''text'': home_frag + score_frag + away_frag + [{''text'':
+            '' '' ~ clock, ''color'': white}], ''icon'': ''2965'', ''durationMs'':
+            8000} | to_json }}'
+      alias: 'Live: score and clock'
+    - conditions:
+      - condition: state
+        entity_id: timer.uc_final_score_display
+        state: active
+      sequence:
+      - action: mqtt.publish
+        data:
+          evaluate_payload: false
+          qos: 0
+          retain: false
+          topic: awtrixLiving/cmd/apps/pushed/ucscore
+          payload: '{{ {''text'': [{''text'': ''FT '', ''color'': white}] + home_frag
+            + score_frag + away_frag, ''icon'': ''2965'', ''durationMs'': 8000, ''lifetimeMs'':
+            1200000, ''lifetimeExpiry'': ''remove''} | to_json }}'
+        note: lifetimeMs is a device-side backstop only. The timer is what normally
+          ends this window.
+      alias: 'Full time: result for 20 minutes'
+    - conditions:
+      - condition: state
+        entity_id: binary_sensor.soccer_live_universidad_catolica_match_today
+        state: 'on'
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: sensor.soccer_live_universidad_catolica_next_match
+          attribute: next_match_status
+          state:
+          - in
+          - post
+      sequence:
+      - action: mqtt.publish
+        data:
+          evaluate_payload: false
+          qos: 0
+          retain: false
+          topic: awtrixLiving/cmd/apps/pushed/ucscore
+          payload: '{{ {''text'': home_frag + [{''text'': '' vs '', ''color'': white}]
+            + away_frag + [{''text'': '' '' ~ ko, ''color'': white}], ''icon'': ''2965'',
+            ''durationMs'': 8000} | to_json }}'
+      alias: 'Match day: fixture reminder'
     default:
     - action: mqtt.publish
       data:
@@ -1183,20 +1243,94 @@
   mode: restart
   variables:
     m: sensor.soccer_live_universidad_catolica_next_match
-    home_abbrev: '{{ ''UC'' if state_attr(m, ''next_match_home_team'') == state_attr(m,
-      ''team_name'') else (state_attr(m, ''next_match_home_abbrev'') or state_attr(m,
-      ''next_match_home_team'') or ''?'') }}'
-    away_abbrev: '{{ ''UC'' if state_attr(m, ''next_match_away_team'') == state_attr(m,
-      ''team_name'') else (state_attr(m, ''next_match_away_abbrev'') or state_attr(m,
-      ''next_match_away_team'') or ''?'') }}'
-    home_score: '{{ state_attr(m, ''next_match_home_score'') | int(0) }}'
-    away_score: '{{ state_attr(m, ''next_match_away_score'') | int(0) }}'
-    clock: '{{ state_attr(m, ''next_match_clock'') or '''' }}'
+    blue: '#1E90FF'
+    red: '#FF2020'
+    white: '#FFFFFF'
     uc_home: '{{ state_attr(m, ''next_match_home_team'') == state_attr(m, ''team_name'')
       }}'
-    uc_score: '{{ home_score if uc_home | bool else away_score }}'
-    opp_score: '{{ away_score if uc_home | bool else home_score }}'
-    color: '{% if uc_score | int > opp_score | int %}#33FF33{% elif uc_score | int
-      < opp_score | int %}#FF3333{% else %}#FFA500{% endif %}'
-    text: '{{ home_abbrev }} {{ home_score }}-{{ away_score }} {{ away_abbrev }}{%
-      if clock %} {{ clock }}{% endif %}'
+    hs: '{{ state_attr(m, ''next_match_home_score'') | int(0) }}'
+    asc: '{{ state_attr(m, ''next_match_away_score'') | int(0) }}'
+    clock: '{{ state_attr(m, ''next_match_clock'') or '''' }}'
+    opp_abbrev: '{{ (state_attr(m, ''next_match_away_abbrev'') if uc_home | bool else
+      state_attr(m, ''next_match_home_abbrev'')) or ''?'' }}'
+    uc_frag: '{{ [{''text'': ''U'', ''color'': blue}, {''text'': ''C'', ''color'':
+      red}] }}'
+    opp_frag: '{{ [{''text'': opp_abbrev, ''color'': white}] }}'
+    home_frag: '{{ uc_frag if uc_home | bool else opp_frag }}'
+    away_frag: '{{ opp_frag if uc_home | bool else uc_frag }}'
+    score_frag: '{{ [{''text'': '' '' ~ hs ~ ''-'' ~ asc ~ '' '', ''color'': white}]
+      }}'
+    ko: '{{ (state_attr(m, ''next_match_datetime_iso'') | as_datetime | as_local).strftime(''%H:%M'')
+      if state_attr(m, ''next_match_datetime_iso'') else '''' }}'
+- id: '1788231713580'
+  alias: UC Start Final Score Window
+  description: 'Starts the 20 minute post-match window the moment a Catolica match
+    stops being live. ''UC Score on Living Display'' watches that timer and shows
+    the FT result for as long as it runs.
+
+
+    Split out from the display automation on purpose: that one is purely presentational
+    and re-renders on every poll, so starting a timer inside it would keep restarting
+    the window on each refresh. This fires once, on the edge.
+
+
+    from on / to off is explicit so an unavailable blip does not open the window.
+    The cost is that an on -> unavailable -> off sequence is missed, which is preferable
+    to showing a stale result out of nowhere.'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.soccer_live_universidad_catolica_match_live
+    from: 'on'
+    to: 'off'
+    id: full_time
+  conditions: []
+  actions:
+  - action: timer.start
+    target:
+      entity_id: timer.uc_final_score_display
+    note: Duration comes from the helper (20 minutes), so it can be changed in the
+      UI without editing this automation.
+  mode: single
+- id: '1788231725510'
+  alias: UC Score Dismiss From Display
+  description: 'The centre (select) button clears the UC score app while it is the
+    app on screen, so a finished match can be dismissed without waiting out the 20
+    minute window.
+
+
+    Acts only while sensor.living_room_pixel_display_current_app is ucscore, so the
+    button keeps its normal behaviour the rest of the time - the same guard the Ruby
+    chore acknowledgement uses. Both automations trigger on this button; their current_app
+    conditions are mutually exclusive, so only one ever acts.
+
+
+    Cancels the timer as well as deleting the app. Without the cancel, the display
+    automation would repaint the FT result on the next state change and the dismissal
+    would look like it had been ignored.
+
+
+    awtrix-ng has no native dismissal for pushed apps - only notifications support
+    hold/dismiss - so removal has to come from Home Assistant.'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.living_room_pixel_display_button_select
+    from: 'off'
+    to: 'on'
+  conditions:
+  - condition: state
+    entity_id: sensor.living_room_pixel_display_current_app
+    state: ucscore
+  actions:
+  - action: timer.cancel
+    target:
+      entity_id: timer.uc_final_score_display
+    note: 'Must come first: cancelling leaves the timer idle, so any later repaint
+      falls through to the default remove branch instead of the FT branch.'
+  - action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: awtrixLiving/cmd/apps/pushed/ucscore
+      payload: ''
+  mode: single
