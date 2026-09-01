@@ -394,9 +394,9 @@
     - 'on'
     trigger: state
   actions:
-  - data:
-      entity_id: media_player.marantz
-    action: media_player.turn_on
+  - action: media_player.turn_on
+    target:
+      entity_id: media_player.marantz_nr1607
 - id: '1770585363953'
   alias: Turn off receiver when chromecast off
   description: ''
