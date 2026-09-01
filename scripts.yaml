@@ -3,7 +3,7 @@ find_remote:
   - action: androidtv.adb_command
     metadata: {}
     target:
-      device_id: 3f05eb43811d8be57abb0fb9d9081c2f
+      entity_id: media_player.android_tv_192_168_20_164
     data:
       command: am start -a android.intent.action.VIEW -d -n com.nvidia.remotelocator/.ShieldRemoteLocatorActivity
   alias: Find Remote

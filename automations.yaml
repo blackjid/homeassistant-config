@@ -76,31 +76,25 @@
   alias: 'Entrance: Car lights at night'
   description: Turn on garage lights when someone or a car is spotted and it is already
     dark outside
-  trigger:
-  - type: turned_on
-    platform: device
-    device_id: f64ea065f446a9b8550e978c289127c9
-    entity_id: binary_sensor.entrance_vehicle
-    domain: binary_sensor
+  triggers:
+  - trigger: motion.detected
+    target:
+      entity_id:
+      - binary_sensor.entrance_vehicle
+      - binary_sensor.entrance_person
     id: car_lights
-  - type: turned_on
-    platform: device
-    device_id: f64ea065f446a9b8550e978c289127c9
-    entity_id: binary_sensor.entrance_person
-    domain: binary_sensor
-    id: car_lights
-  condition:
+    note: 'Was two device triggers on device f64ea065, which no longer exists in the
+      device registry - the Frigate camera device was re-added at some point and device
+      ids do not survive that. Both binary_sensors are device_class motion, so motion.detected
+      is the native fit. Targets the two entities explicitly rather than area_id entrance:
+      that area also holds dog/cat/person occupancy sensors, and an area target would
+      light the garage for the dog.'
+  conditions:
   - condition: state
     entity_id: sun.sun
     state: below_horizon
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 0
-  action:
+  actions:
   - action: light.turn_on
-    metadata: {}
-    data: {}
     target:
       area_id: entrance
   mode: single
@@ -191,8 +185,8 @@
   - action: light.turn_on
     metadata: {}
     data:
-      kelvin: 5167
       brightness_pct: 76
+      color_temp_kelvin: 5167
     target:
       entity_id:
       - light.garage_green_garden_sconces
