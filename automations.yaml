@@ -222,7 +222,12 @@
   mode: single
 - id: '1753320916792'
   alias: Morning Music - Weekdays
-  description: Play morning playlist on weekdays at 6:20 AM
+  description: 'Play morning playlist on weekdays at 6:20 AM.
+
+
+    The old spotcast.play_media call also targeted media_player.morning, a cast group
+    that no longer exists, so this step had two independent faults. Both the player
+    and the service are now Music Assistant.'
   triggers:
   - at: 06:25:00
     trigger: time
@@ -245,15 +250,30 @@
       minutes: 5
       seconds: 0
       milliseconds: 0
-  - action: spotcast.play_media
+  - action: media_player.volume_set
+    target:
+      entity_id: media_player.morning_speaker_group
     data:
-      media_player:
-        entity_id: media_player.morning
-      spotify_uri: spotify:playlist:37i9dQZF1DXcgZcN2HVMoe
-      account: 01K0W21M7XR5XCXHXKE8E8X48D
-      data:
-        shuffle: true
-        volume: 10
+      volume_level: 0.1
+    note: 'Set before playback so it cannot start at whatever volume was left behind.
+      spotcast took volume: 10 as a percentage; the native action wants a 0-1 level.'
+  - action: music_assistant.play_media
+    target:
+      entity_id: media_player.morning_speaker_group
+    data:
+      media_id: spotify://playlist/37i9dQZF1DXcgZcN2HVMoe
+      media_type: playlist
+    note: Replaces spotcast.play_media, which has been failing since the spotcast
+      integration was removed. Music Assistant resolves spotify:// URIs; a bare cast
+      entity cannot, which is why this targets the Music Assistant player rather than
+      the cast one. Note the URI form differs from spotcast's spotify:playlist:<id>.
+  - action: media_player.shuffle_set
+    target:
+      entity_id: media_player.morning_speaker_group
+    data:
+      shuffle: true
+    note: 'Carries over spotcast''s shuffle: true. Applied after playback starts,
+      since starting a new queue resets it.'
   - delay:
       hours: 0
       minutes: 10
@@ -280,18 +300,33 @@
       notify_device: 67f6dbe20d82870dd56609e038922ff9
 - id: '1759271522906'
   alias: Night Time
-  description: Play sleepeing babies playlist
+  description: 'Play sleeping babies playlist.
+
+
+    WARNING: this automation has no triggers, so it can only ever run manually or
+    from another automation. Nothing currently calls it, which means it is effectively
+    inert. Left as-is rather than guessing at a bedtime schedule.'
   triggers: []
   conditions: []
   actions:
-  - action: spotcast.play_media
+  - action: media_player.volume_set
+    target:
+      entity_id: media_player.family_room_speaker_2
     data:
-      spotify_uri: spotify:playlist:6ajGdGv7pUqs74fZGByjfx
-      account: 01K0W21M7XR5XCXHXKE8E8X48D
-      data:
-        volume: 30
-      media_player:
-        device_id: c36e5f0bbb732975fa876b27ad4f9b4f
+      volume_level: 0.3
+    note: 'spotcast took volume: 30 as a percentage; the native action wants a 0-1
+      level.'
+  - action: music_assistant.play_media
+    target:
+      entity_id: media_player.family_room_speaker_2
+    data:
+      media_id: spotify://playlist/6ajGdGv7pUqs74fZGByjfx
+      media_type: playlist
+    note: Replaces spotcast.play_media. The old call targeted device c36e5f0bbb73
+      (Family Room Speaker) by device id; this targets the Music Assistant entity
+      for the same speaker, since Music Assistant is what resolves spotify:// URIs.
+      No shuffle here - the spotcast call did not set it, and shuffling a sleep playlist
+      is probably not wanted.
   - action: light.turn_on
     metadata: {}
     data:
