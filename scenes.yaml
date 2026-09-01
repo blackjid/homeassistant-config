@@ -1,101 +1,21 @@
 - id: '1732615878345'
   name: Morning
   entities:
-    media_player.master_bathroom:
+    media_player.master_bathroom_speaker:
+      state: playing
       volume_level: 0.4439266622066498
-      is_volume_muted: false
-      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
-      media_content_type: music
-      media_duration: 267
-      media_position: 248.855
-      media_position_updated_at: '2024-11-26T10:11:04.491203+00:00'
-      media_title: Chasing Cars
-      media_artist: Snow Patrol
-      media_album_name: Eyes Open
-      app_id: 705D30C6
-      app_name: Spotify
-      entity_picture_local: /api/media_player_proxy/media_player.master_bathroom?token=c2f3c24747d03845809d2537c91a08268ef1a0cf30586ff43610f771962ba6a4&cache=16ec4b8792e85e5c
-      device_class: speaker
-      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
-      friendly_name: Master Bathroom
-      supported_features: 152511
+    media_player.kid_s_bathroom_speaker:
       state: playing
-    media_player.kids_bathroom:
       volume_level: 0.11979826539754868
-      is_volume_muted: false
-      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
-      media_content_type: music
-      media_duration: 267
-      media_position: 248.855
-      media_position_updated_at: '2024-11-26T10:11:04.491295+00:00'
-      media_title: Chasing Cars
-      media_artist: Snow Patrol
-      media_album_name: Eyes Open
-      app_id: 705D30C6
-      app_name: Spotify
-      entity_picture_local: /api/media_player_proxy/media_player.kids_bathroom?token=4427d641dc840cbf17a9bd310e9e9d2a4011d1f36ba2dad23da329a39b162784&cache=16ec4b8792e85e5c
-      device_class: speaker
-      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
-      friendly_name: Kids Bathroom
-      supported_features: 152511
+    media_player.kitchen_speaker_2:
       state: playing
-    media_player.kitchen_speaker:
       volume_level: 0.2523389756679535
-      is_volume_muted: false
-      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
-      media_content_type: music
-      media_duration: 267
-      media_position: 248.855
-      media_position_updated_at: '2024-11-26T10:11:04.491240+00:00'
-      media_title: Chasing Cars
-      media_artist: Snow Patrol
-      media_album_name: Eyes Open
-      app_id: 705D30C6
-      app_name: Spotify
-      entity_picture_local: /api/media_player_proxy/media_player.kitchen_speaker?token=6fac4678e5626f2cab1d48ceeb09db5f7fdab5d60fe4b330b480c1c594ffc2cc&cache=16ec4b8792e85e5c
-      device_class: speaker
-      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
-      friendly_name: Kitchen speaker
-      supported_features: 152511
+    media_player.mom_s_office_speaker:
       state: playing
-    media_player.office:
       volume_level: 0.0747094601392746
-      is_volume_muted: false
-      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
-      media_content_type: music
-      media_duration: 267
-      media_position: 248.855
-      media_position_updated_at: '2024-11-26T10:11:04.491265+00:00'
-      media_title: Chasing Cars
-      media_artist: Snow Patrol
-      media_album_name: Eyes Open
-      app_id: 705D30C6
-      app_name: Spotify
-      entity_picture_local: /api/media_player_proxy/media_player.office?token=2614b43ea494035d0ab4d3a6add20bb96c6dd76eb0aa49c84cc51d256081ff92&cache=16ec4b8792e85e5c
-      device_class: speaker
-      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
-      friendly_name: Office
-      supported_features: 152511
+    media_player.family_room_speaker_2:
       state: playing
-    media_player.family_room:
       volume_level: 0.22768521308898926
-      is_volume_muted: false
-      media_content_id: spotify:track:5hnyJvgoWiQUYZttV4wXy6
-      media_content_type: music
-      media_duration: 267
-      media_position: 248.855
-      media_position_updated_at: '2024-11-26T10:11:04.491066+00:00'
-      media_title: Chasing Cars
-      media_artist: Snow Patrol
-      media_album_name: Eyes Open
-      app_id: 531A4F84
-      app_name: Spotify
-      entity_picture_local: /api/media_player_proxy/media_player.family_room?token=745cdb843cbd18004fe5fbf5b710313f2e07766674a55a59ff47f03a83bf5d53&cache=16ec4b8792e85e5c
-      device_class: speaker
-      entity_picture: https://i.scdn.co/image/ab67616d0000b2735da2756220da9b6f17924f8f
-      friendly_name: Family Room
-      supported_features: 152511
-      state: playing
   metadata: {}
 - id: '1733793180450'
   name: Movie Night
