@@ -3,5 +3,6 @@ platform: group
 name: Backyard
 unique_id: backyard_lights_group
 entities:
-  - light.terrace
+  - light.terrace_sconces_1
+  - light.terrace_sconces_2
   - light.pool

@@ -188,9 +188,7 @@
       brightness_pct: 76
       color_temp_kelvin: 5167
     target:
-      entity_id:
-      - light.garage_green_garden_sconces
-      - light.entrance_porch
+      entity_id: light.terrace_master_bedroom_terrace_controller_garage_green_garden_sconces
   mode: single
 - id: '1729806228791'
   alias: Outside Lights - Turn Off
