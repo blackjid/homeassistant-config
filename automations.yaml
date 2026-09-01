@@ -1202,11 +1202,12 @@
           qos: 0
           retain: false
           topic: awtrixLiving/cmd/apps/pushed/ucscore
-          payload: '{{ {''text'': [{''text'': ''FT '', ''color'': white}] + home_frag
-            + score_frag + away_frag, ''icon'': ''2965'', ''durationMs'': 8000, ''lifetimeMs'':
-            1200000, ''lifetimeExpiry'': ''remove''} | to_json }}'
-        note: lifetimeMs is a device-side backstop only. The timer is what normally
-          ends this window.
+          payload: '{{ {''text'': home_frag + score_frag + away_frag, ''icon'': ''2965'',
+            ''durationMs'': 8000, ''lifetimeMs'': 1200000, ''lifetimeExpiry'': ''remove''}
+            | to_json }}'
+        note: lifetimeMs is a device-side backstop only; the timer normally ends this
+          window. No FT prefix - the clock fragment is what separates the two, so
+          a live match reads UC 3-2 OHI 79' and a finished one just UC 3-2 OHI.
       alias: 'Full time: result for 20 minutes'
     - conditions:
       - condition: state
@@ -1264,24 +1265,34 @@
       if state_attr(m, ''next_match_datetime_iso'') else '''' }}'
 - id: '1788231713580'
   alias: UC Start Final Score Window
-  description: 'Starts the 20 minute post-match window the moment a Catolica match
-    stops being live. ''UC Score on Living Display'' watches that timer and shows
-    the FT result for as long as it runs.
+  description: 'Starts the 20 minute post-match window when the provider reports the
+    match finished. ''UC Score on Living Display'' watches that timer and shows the
+    result for as long as it runs.
 
 
-    Split out from the display automation on purpose: that one is purely presentational
-    and re-renders on every poll, so starting a timer inside it would keep restarting
-    the window on each refresh. This fires once, on the edge.
+    Triggers on the integration''s own match_finished event rather than on binary_sensor
+    match_live going off. The event carries the provider''s exact finish timestamp
+    and the score at that moment, so the window starts on the real end of the match
+    instead of on whenever a polled binary sensor happens to flip. It also cannot
+    be opened by an unavailable blip, which the previous from on / to off edge could
+    not fully rule out.
 
 
-    from on / to off is explicit so an unavailable blip does not open the window.
-    The cost is that an on -> unavailable -> off sequence is missed, which is preferable
-    to showing a stale result out of nowhere.'
+    Split out from the display automation on purpose: that one re-renders on every
+    poll, so starting the timer there would restart the 20 minutes on each refresh.
+    This fires once, on the event.
+
+
+    Known limitation: this is still an edge. If Home Assistant is down at the moment
+    the match finishes, the event is missed and no window opens. The result is simply
+    never shown, which is the harmless direction to fail.'
   triggers:
-  - trigger: state
-    entity_id: binary_sensor.soccer_live_universidad_catolica_match_live
-    from: 'on'
-    to: 'off'
+  - trigger: event.received
+    target:
+      entity_id: event.soccer_live_universidad_catolica_match_event
+    options:
+      event_type:
+      - match_finished
     id: full_time
   conditions: []
   actions:
@@ -1289,7 +1300,7 @@
     target:
       entity_id: timer.uc_final_score_display
     note: Duration comes from the helper (20 minutes), so it can be changed in the
-      UI without editing this automation.
+      UI without touching this automation.
   mode: single
 - id: '1788231725510'
   alias: UC Score Dismiss From Display
