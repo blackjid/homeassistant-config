@@ -978,11 +978,6 @@
     on the living room speaker and force the matching app onto the Pixel Display.
 
 
-    Triggers on the last_seen ATTRIBUTE, not the state: the face sensor is sticky
-    and holds the last recognised name, so the same person walking past twice produces
-    no state change at all.
-
-
     Two independent limits, because they do different jobs. The counter caps announcements
     at two per feeding period (refilled 06:00 and 13:00 by ''Reset Ruby Voice Announcement
     Quota''). The 30 minute timer spaces them out - without it both allowed announcements
@@ -1025,8 +1020,17 @@
     her.'
   triggers:
   - trigger: state
-    entity_id: sensor.frigate_face_recognition_living_room_last_recognized_face
-    attribute: last_seen
+    entity_id: sensor.living_room_living_room_last_recognized_face
+    not_to:
+    - 'None'
+    - Unknown
+    - unknown
+    - unavailable
+    note: 'Frigate''s native per-camera sensor has NO attributes - no last_seen, no
+      score - so this triggers on the state itself. Safe because the sensor is not
+      sticky: the integration resets it to the literal None 60s after the last face
+      message, so a repeat visit is a real state change. Unknown means an unrecognised
+      face. No confidence threshold is available here.'
   conditions:
   - condition: numeric_state
     entity_id: counter.ruby_voice_announcements_this_period
@@ -1038,8 +1042,10 @@
     after: 07:00:00
     before: '21:00:00'
   - condition: template
-    value_template: '{{ states(''sensor.frigate_face_recognition_living_room_last_recognized_face'')
+    value_template: '{{ states(''sensor.living_room_living_room_last_recognized_face'')
       == states(''input_select.ruby_care_turn'') }}'
+    note: Stays a template because it compares two entity states to each other, which
+      no native condition does.
   - condition: or
     conditions:
     - condition: not
