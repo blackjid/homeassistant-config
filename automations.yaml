@@ -515,22 +515,22 @@
   mode: single
 - id: '1770952525587'
   alias: Turn on light and end Movie night when TV off
-  description: ''
+  description: 'When the living room TV goes off after dark and Movie night is still
+    on, clear the Movie night flag and bring the living room light back up.
+
+
+    Both original triggers were dead device triggers and the automation would not
+    load at all: one pointed at device 8cc47a77 (gone from the device registry), the
+    other at a switch entity of the SmartThings TV that no longer exists - SmartThings
+    maps TVs to media_player only now.'
   triggers:
-  - device_id: 8cc47a77e4578c0cb6c72d470e357b44
-    domain: media_player
-    entity_id: 798aa2b203a935b6f99d4383176a15ee
-    type: turned_off
-    trigger: device
-  - type: turned_off
-    device_id: 7152e2ff59a2d93ffaa53247237dd75c
-    entity_id: 2142555853504c62857db4a723f232d5
-    domain: switch
-    trigger: device
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 1
+  - trigger: media_player.turned_off
+    target:
+      entity_id: media_player.55_oled
+    note: 'Purpose-specific trigger on the SmartThings TV entity, not a device trigger
+      - device ids do not survive a device being re-added, which is exactly how this
+      automation died. No dwell time: the old 1s debounce came from a Z-Wave relay,
+      and this entity is cloud-polled so a sub-second window means nothing.'
   conditions:
   - condition: sun
     after: sunset
@@ -541,15 +541,11 @@
     - 'on'
   actions:
   - action: input_boolean.turn_off
-    metadata: {}
     target:
       entity_id: input_boolean.movie_night
-    data: {}
   - action: light.turn_on
-    metadata: {}
     target:
       entity_id: light.living_room
-    data: {}
   mode: single
 - id: '1770954468322'
   alias: test cafe
@@ -1022,7 +1018,7 @@
   - trigger: state
     entity_id: sensor.living_room_living_room_last_recognized_face
     not_to:
-    - 'None'
+    - None
     - Unknown
     - unknown
     - unavailable
