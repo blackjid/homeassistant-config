@@ -1112,6 +1112,11 @@
     device - it keeps its app list in RAM only.
 
 
+    Catolica are always shown as UC, never the provider''s CDUC abbreviation. This
+    is applied by comparing each side against team_name rather than hardcoding a slot,
+    so it holds whether they are at home or away.
+
+
     No icon set on purpose: the awtrix-ng HTTP API on this device exposes no icon
     listing, so rather than guess an id that renders blank, this is text-only. Numeric
     LaMetric ids do work here (the Ruby food app uses 5242), so an icon can be added
@@ -1122,6 +1127,15 @@
     - sensor.soccer_live_universidad_catolica_next_match
     - binary_sensor.soccer_live_universidad_catolica_match_live
     id: changed
+    note: No to/from filter, so attribute-only updates count too. The integration
+      polls every 60s while live and some of those polls move the clock attribute
+      without changing the state string, which would otherwise be dropped.
+  - trigger: time_pattern
+    minutes: /1
+    id: tick
+    note: Belt and braces refresh, matched to the integration's 60s live_scan_interval.
+      Gated by the condition below so it only publishes while a match is actually
+      live - otherwise this would push an empty payload every minute, all day.
   - trigger: homeassistant
     event: start
     id: sync
@@ -1130,14 +1144,18 @@
   conditions:
   - condition: or
     conditions:
-    - condition: trigger
-      id: sync
-    - condition: template
-      value_template: '{{ trigger.from_state.state != trigger.to_state.state }}'
-    note: 'The sync branch is listed first deliberately: on a homeassistant start
-      trigger there is no trigger.from_state, so the template below would raise. An
-      or condition short-circuits on the first true branch, so it never renders in
-      that case.'
+    - condition: state
+      entity_id: binary_sensor.soccer_live_universidad_catolica_match_live
+      state: 'on'
+    - condition: not
+      conditions:
+      - condition: trigger
+        id: tick
+    note: Run whenever a match is live, and otherwise only for real events - never
+      for a minute tick. That lets a state change or a restart still clear a finished
+      match, without the tick spamming an empty publish once a minute forever. Replaces
+      an earlier trigger.from_state template guard, which both dropped attribute-only
+      updates and would have raised on the tick and start triggers.
   actions:
   - choose:
     - conditions:
@@ -1165,10 +1183,12 @@
   mode: restart
   variables:
     m: sensor.soccer_live_universidad_catolica_next_match
-    home_abbrev: '{{ state_attr(m, ''next_match_home_abbrev'') or state_attr(m, ''next_match_home_team'')
-      or ''?'' }}'
-    away_abbrev: '{{ state_attr(m, ''next_match_away_abbrev'') or state_attr(m, ''next_match_away_team'')
-      or ''?'' }}'
+    home_abbrev: '{{ ''UC'' if state_attr(m, ''next_match_home_team'') == state_attr(m,
+      ''team_name'') else (state_attr(m, ''next_match_home_abbrev'') or state_attr(m,
+      ''next_match_home_team'') or ''?'') }}'
+    away_abbrev: '{{ ''UC'' if state_attr(m, ''next_match_away_team'') == state_attr(m,
+      ''team_name'') else (state_attr(m, ''next_match_away_abbrev'') or state_attr(m,
+      ''next_match_away_team'') or ''?'') }}'
     home_score: '{{ state_attr(m, ''next_match_home_score'') | int(0) }}'
     away_score: '{{ state_attr(m, ''next_match_away_score'') | int(0) }}'
     clock: '{{ state_attr(m, ''next_match_clock'') or '''' }}'
